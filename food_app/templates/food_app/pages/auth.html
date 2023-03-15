@@ -1,7 +1,3 @@
-{% extends 'food_app/base.html' %}
-
-{% load static %}
-
 {% block title %} Вход {% endblock %}
 
 {% block content %}
@@ -19,18 +15,21 @@
               <h2 class="text-center"><strong>Авторизация</strong></h2>
           </div>
           <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
-              <form>
+              <form method="post" action="{% url 'account_login' %}">
+                  {{ form.non_field_errors }}
+                  {{ form.errors }}
+                  {% csrf_token %}
                   <h1 class="mb-4 text-center"><strong>Вход</strong></h1>
                   <div class="mb-3">
                       <label for="exampleInputEmail1" class="form-label">Email</label>
-                      <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+                      <input name="{{ form.login.name }}" type="email" class="form-control" id="email" aria-describedby="emailHelp">
                   </div>
                   <div class="mb-3">
                       <div class="d-flex align-items-center justify-content-between">
                           <label for="exampleInputPassword1" class="form-label">Пароль</label>
-                          <small><a href="#" class="link-dark foodplan_green">Забыли пароль?</a></small>
+                          <small><a href="{% url 'account_reset_password' %}" class="link-dark foodplan_green">Забыли пароль?</a></small>
                       </div>
-                      <input type="password" class="form-control" id="password">
+                      <input name="{{ form.password.name }}" type="password" class="form-control" id="password">
                   </div>
                   <div class="row mb-3">
                       <div class="col-12 col-sm-6 mt-3">
@@ -38,7 +37,7 @@
                               class="btn w-100 btn-outline-success shadow-none foodplan_green foodplan__border_green">Войти</button>
                       </div>
                       <div class="col-12 col-sm-6 mt-3 d-flex justify-content-center align-items-center">
-                          <small>Нет аккаунта? <a href="#" class="link-dark foodplan_green">Зарегистрируйтесь</a></small>
+                          <small>Нет аккаунта? <a href="{% url 'account_signup' %}" class="link-dark foodplan_green">Зарегистрируйтесь</a></small>
                       </div>
                   </div>
               </form>
