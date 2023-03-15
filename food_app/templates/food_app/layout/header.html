@@ -6,12 +6,15 @@
           <a class="navbar-brand" href="#">
               <img src="{% static 'food_app/img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
           </a>
+          <div>
           {% if user.is_authenticated %}
-            <a href="#" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Выйти</a>
+              <span class="h5">Вы вошли как: <span class="text-primary">{{ request.user.first_name }} {{ request.user.last_name }}&nbsp;</span></span>
+              <a href="{% url 'food_app:account' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Личный кабинет</a>
+              <a href="/accounts/logout/" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Выйти</a>
           {% else %}
-            <a href="#" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Войти</a>
+            <a href="/accounts/login/" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Войти</a>
           {% endif %}
-
+          </div>
       </div>
   </nav>
 </header>
