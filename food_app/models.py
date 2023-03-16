@@ -1,10 +1,10 @@
+from tabnanny import verbose
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import duration
 
 
 class RecipeCategory(models.Model):
-    name = models.CharField('Название')
+    name = models.CharField('Название', max_length=150)
     description = models.TextField('Описание')
 
     class Meta:
@@ -36,14 +36,12 @@ class Recipe(models.Model):
     calories = models.PositiveSmallIntegerField(
         'Калории(Ккал)',
         default=0,
-        validator=[MinValueValidator(0)],
     )
     cooking_time = models.PositiveSmallIntegerField(
         'Время готовки (мин)',
         default=1,
         blank=True,
         null=True,
-        validator=[MinValueValidator(1)],
     )
     food_intake = models.ForeignKey(
         'FoodIntake',
@@ -88,15 +86,7 @@ class AllergicCategory(models.Model):
 class Ingredient(models.Model):
     name = models.CharField('Название', max_length=150)
     weight = models.FloatField('Вес(граммы)')
-    calories = models.PositiveSmallIntegerField(
-        'Калории(Ккал)',
-        default=0,
-        validators=[MinValueValidator(0)],
-    )
-    calories_per_100g = models.PositiveSmallIntegerField(
-        'Калории на 100 г.',
-        validators=[MinValueValidator(0), MaxValueValidator(2000)],
-    )
+    calories_per_100g = models.PositiveSmallIntegerField('Калории на 100 г.')
     allergic_category = models.ForeignKey(
         AllergicCategory,
         verbose_name='Категории аллергенов',
@@ -110,7 +100,8 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         indexes = [
-            models.Index(fields=['cooking_time']),
+            models.Index(fields=['name']),
+            models.Index(fields=['calories_per_100g']),
         ]
 
     def __str__(self):
@@ -119,7 +110,6 @@ class Ingredient(models.Model):
 
 class FoodIntake(models.Model):
     name = models.CharField('Прием пищи', max_length=30)
-    plan =
 
     class Meta:
         verbose_name = 'Прием пищи'
@@ -128,64 +118,71 @@ class FoodIntake(models.Model):
             models.Index(fields=['name']),
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
 class PlanPeriod(models.Model):
-    duration = models.PositiveBigIntegerField(
-        'Срок подписки',
-        default=1,
-        validators=[MinValueValidator(1), MaxValueValidator(24)],
-    )
-    price = models.PositiveSmallIntegerField('Цена', default=100)
-
+    duration = models.PositiveSmallIntegerField('Срок подписки', default=1)
 
     class Meta:
-        verbose_name = 'Период подписки'
-        verbose_name = 'Периоды подписок'
-        indexes = [
-            models.Index(fields=['duration']),
-            models.Index(fields=['price']),
-        ]
+        verbose_name = 'Срок подписки'
+        verbose_name = 'Сроки подписок'
+        indexes = [models.Index(fields=['duration'])]
 
-    def __str__(self) -> str:
-        return f'Подписка на: {duration} месяцев'
+    def __str__(self):
+        if self.duration % 10 == 1 and self.duration % 100 != 11:
+            month = 'месяц'
+        elif 2 <= self.duration % 10 <= 4 and (
+            self.duration % 100 < 10 or self.duration % 100 >= 20
+        ):
+            month = 'месяца'
+        else:
+            month = 'месяцев'
+
+        return f'Подписка на {self.duration} {month}'
 
 
 class Plan(models.Model):
-    # period = models.OneToOneField(PlanPeriod, verbose_name="Срок подписки")
-
-    class Plan(models.IntegerChoices):
-        ONE = 1, 1
-        THREE = 3, 3
-        TWELVE= 6, 6
-
-
-
-    price = models.SmallIntegerField(verbose_name="Цена")
-    persons = models.SmallIntegerField(verbose_name="Кол-во человек")
-    allergy = models.ForeignKey(Allergy, on_delete=models.PROTECT)
-
-    def __str__(self):
-        return self.period
+    price = models.DecimalField('Цена', max_digits=12, decimal_places=2)
+    persons = models.PositiveSmallIntegerField('Кол-во человек', default=1)
+    period = models.OneToOneField(
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.CASCADE
+    )
+    allergies = models.ForeignKey(
+        AllergicCategory,
+        verbose_name='Аллергии',
+        related_name='plans',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Тариф'
         verbose_name_plural = 'Тарифы'
-        ordering = ['period']
+        indexes = [
+            models.Index(fields=['price']),
+        ]
+
+    def __str__(self):
+        return f'План #{self.id}'
 
 
 class Subscription(models.Model):
-    start = models.DateField(auto_now_add=True, verbose_name='Начало подписки', db_index=True)
-    end = models.DateField(verbose_name='Конец подписки', db_index=True)
-    is_active = models.BooleanField(default=False, db_index=True, verbose_name='Статус')
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, verbose_name='План')
-
-    def __str__(self):
-        return f'С {self.start} до {self.end}'
+    start = models.DateField('Начало подписки', auto_now_add=True)
+    end = models.DateField('Окончание подписки')
+    is_active = models.BooleanField('Статус', default=False)
+    plan = models.OneToOneField(Plan, verbose_name='План', on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ['is_active']
+        indexes = [
+            models.Index(fields=['start']),
+            models.Index(fields=['end']),
+            models.Index(fields=['is_active']),
+        ]
+
+    def __str__(self):
+        return f'С {self.start} до {self.end}'

@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'phonenumber_field'
+    'phonenumber_field',
     'allauth',
     'allauth.account',
     'food_app.apps.FoodAppConfig',
