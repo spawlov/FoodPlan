@@ -46,15 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
-    'phonenumber_field'
-=======
-
+    'phonenumber_field',
     'allauth',
     'allauth.account',
-
->>>>>>> 4541b4031568617da0a099a6d3cc116749cfb8e4
-    'food_app.apps.FoodAppConfig'
+    'food_app.apps.FoodAppConfig',
 ]
 
 MIDDLEWARE = [
