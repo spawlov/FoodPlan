@@ -1,5 +1,6 @@
-from tabnanny import verbose
-from django.core.validators import MaxValueValidator, MinValueValidator
+import os
+
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -21,7 +22,8 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = models.TextField('Описание')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
+                              verbose_name='Картинка', blank=True)
     cooking_method = models.TextField('Способ приготовления')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
@@ -127,14 +129,14 @@ class PlanPeriod(models.Model):
 
     class Meta:
         verbose_name = 'Срок подписки'
-        verbose_name = 'Сроки подписок'
+        verbose_name_plural = 'Сроки подписок'
         indexes = [models.Index(fields=['duration'])]
 
     def __str__(self):
         if self.duration % 10 == 1 and self.duration % 100 != 11:
             month = 'месяц'
         elif 2 <= self.duration % 10 <= 4 and (
-            self.duration % 100 < 10 or self.duration % 100 >= 20
+                self.duration % 100 < 10 or self.duration % 100 >= 20
         ):
             month = 'месяца'
         else:
@@ -147,7 +149,8 @@ class Plan(models.Model):
     price = models.DecimalField('Цена', max_digits=12, decimal_places=2)
     persons = models.PositiveSmallIntegerField('Кол-во человек', default=1)
     period = models.OneToOneField(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.CASCADE
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
+        on_delete=models.CASCADE
     )
     allergies = models.ForeignKey(
         AllergicCategory,
@@ -173,7 +176,8 @@ class Subscription(models.Model):
     start = models.DateField('Начало подписки', auto_now_add=True)
     end = models.DateField('Окончание подписки')
     is_active = models.BooleanField('Статус', default=False)
-    plan = models.OneToOneField(Plan, verbose_name='План', on_delete=models.PROTECT)
+    plan = models.OneToOneField(Plan, verbose_name='План',
+                                on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = 'Подписка'
@@ -186,3 +190,36 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'С {self.start} до {self.end}'
+
+
+def get_uploading_path(instance, filename):
+    return os.path.join(str(instance.user.username), filename)
+
+
+class Customer(models.Model):
+    user = models.OneToOneField(
+        User,
+        related_name='users',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
+    subscribe = models.OneToOneField(
+        Subscription,
+        related_name='subscribes',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name='Подписка'
+    )
+    avatar = models.ImageField(
+        upload_to=get_uploading_path,
+        blank=True,
+        verbose_name='Аватар'
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.user.username

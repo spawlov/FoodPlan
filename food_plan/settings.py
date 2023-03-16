@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'allauth',
     'allauth.account',
-    'food_app.apps.FoodAppConfig',
+    'food_app.apps.FoodAppConfig'
 ]
 
 MIDDLEWARE = [
