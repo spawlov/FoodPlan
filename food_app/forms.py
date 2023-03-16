@@ -30,7 +30,7 @@ class PaymentForm(forms.Form):
     card_name = forms.CharField(min_length=2, label='Имя владельца')
     card_number = forms.CharField(min_length=16, max_length=16, label='Номер карты')
     card_month = forms.IntegerField(min_value=1, max_value=12, label='Месяц')
-    card_day = forms.IntegerField(min_value=1, max_value=31, label='День')
+    card_year = forms.IntegerField(min_value=23, max_value=50, label='Год')
     card_cvc = forms.CharField(min_length=3, max_length=3, label='CVC')
 
     def __init__(self, *args, **kwargs):
@@ -66,10 +66,10 @@ class PaymentForm(forms.Form):
                 'oninput': 'this.value = this.value.slice(0, 2)',
             }
         )
-        self.fields['card_day'].widget.attrs.update(
+        self.fields['card_year'].widget.attrs.update(
             {
                 'class': 'form-control',
-                'placeholder': 'ДД',
+                'placeholder': 'ГГ',
                 'type': 'number',
                 'id': 'expiry-date-day',
                 'pattern': '(0[1-9]|1[0-2])\/[0-9]{2}',
@@ -90,5 +90,5 @@ class PaymentForm(forms.Form):
         self.fields['card_name'].label_attrs = {'class': 'form-label'}
         self.fields['card_number'].label_attrs = {'class': 'form-label'}
         self.fields['card_month'].label_attrs = {'class': 'form-label'}
-        self.fields['card_day'].label_attrs = {'class': 'form-label'}
+        self.fields['card_year'].label_attrs = {'class': 'form-label'}
         self.fields['card_cvc'].label_attrs = {'class': 'form-label'}
