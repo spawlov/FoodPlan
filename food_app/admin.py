@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import AllergicCategory, FoodIntake, PlanPeriod, Recipe, Ingredient, RecipeIngredient, RecipeCategory, Subscription
+from .models import (
+    AllergicCategory,
+    FoodIntake,
+    PlanPeriod,
+    Product,
+    Recipe,
+    Ingredient,
+    RecipeCategory,
+    Subscription,
+)
 
 
 @admin.register(RecipeCategory)
@@ -18,40 +27,33 @@ class RecipeCategoryAdmin(admin.ModelAdmin):
     )
 
 
-class RecipeIngredientInline(admin.TabularInline):
-    model = RecipeIngredient
+class IngredientInline(admin.TabularInline):
+    model = Ingredient
     extra = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = [RecipeIngredientInline]
-    list_display = (
-        'title',
-        'category',
-        'calories',
-        'cooking_time',
-        'food_intake'
-    )
+    inlines = [IngredientInline]
+    list_display = ('title', 'category', 'cooking_time', 'food_intake')
     list_filter = (
         'category',
         'food_intake',
     )
-    readonly_fields = (
-        'calories',
-    )
-    search_fields = (
-        'title',
-        'description',
-        'cooking_method'
-    )
+    readonly_fields = ('total_calories',)
+    search_fields = ('title', 'description', 'cooking_method')
 
-    def calories(self, obj):
-        return obj.get_total_calories()
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.with_calories()
+
+    @admin.display(description='Каллории')
+    def total_calories(self, obj):
+        return obj.total_calories
 
 
-@admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'calories_per_100g',
@@ -73,13 +75,16 @@ class IngredientAdmin(admin.ModelAdmin):
 class PlanPeriodAdmin(admin.ModelAdmin):
     list_display = ['duration']
 
+
 @admin.register(FoodIntake)
 class FoodIntake(admin.ModelAdmin):
     list_display = ['name']
 
+
 @admin.register(AllergicCategory)
 class AllergicCategory(admin.ModelAdmin):
     list_display = ['name']
+
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
