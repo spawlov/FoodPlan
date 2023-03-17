@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'django_ckeditor_5',
+    'django_apscheduler',
     'food_app.apps.FoodAppConfig'
 ]
 
@@ -277,3 +278,9 @@ CKEDITOR_5_CONFIGS = {
         }
     }
 }
+
+# APScheduler modul
+# https://apscheduler.readthedocs.io/en/3.x/userguide.html
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
