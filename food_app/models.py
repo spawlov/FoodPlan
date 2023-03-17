@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
+from food_app.querysets import RecipeQuerySet
+
 
 class RecipeCategory(models.Model):
     name = models.CharField('Название', max_length=150)
@@ -18,15 +20,6 @@ class RecipeCategory(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class OrderQuerySet(models.QuerySet):
-    def with_price(self):
-        return self.annotate(
-            calories=models.Sum(
-                models.F('items__product_price') * models.F('items__quantity')
-            ),
-        )
 
 
 class Recipe(models.Model):
@@ -64,7 +57,7 @@ class Recipe(models.Model):
         blank=True,
     )
 
-    objects = OrderQuerySet.as_manager()
+    objects = RecipeQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -73,14 +66,6 @@ class Recipe(models.Model):
             models.Index(fields=['title']),
             models.Index(fields=['cooking_time']),
         ]
-
-    def get_total_calories(self):
-        recipe_ingredients = RecipeIngredient.objects.filter(recipe=self)
-        for recipe_ingredient in recipe_ingredients:
-            ingredient = recipe_ingredient.ingredient
-            quantity = recipe_ingredient.quantity
-            self.calories += ingredient.calories_per_100g * (quantity / 100)
-        return self.calories
 
     def __str__(self):
         return self.title
@@ -100,7 +85,7 @@ class AllergicCategory(models.Model):
         return self.name
 
 
-class Ingredient(models.Model):
+class Product(models.Model):
     name = models.CharField('Название', max_length=150)
     calories_per_100g = models.PositiveSmallIntegerField('Калории на 100 г.')
     allergic_category = models.ForeignKey(
@@ -113,8 +98,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        verbose_name = 'Продукт'
+        verbose_name_plural = 'Продукты'
         indexes = [
             models.Index(fields=['name']),
             models.Index(fields=['calories_per_100g']),
@@ -124,9 +109,19 @@ class Ingredient(models.Model):
         return self.name
 
 
-class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+class Ingredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт',
+        related_name='ingredients',
+        on_delete=models.CASCADE,
+    )
+    product = models.ForeignKey(
+        Product,
+        verbose_name='Продукт',
+        related_name='ingredients',
+        on_delete=models.CASCADE,
+    )
     quantity = models.FloatField('гр.')
 
     class Meta:
@@ -134,7 +129,7 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self):
-        return f'{self.ingredient.name} ({self.quantity} г)'
+        return f'{self.quantity} г'
 
 
 class FoodIntake(models.Model):
@@ -258,4 +253,3 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.user.username
-
