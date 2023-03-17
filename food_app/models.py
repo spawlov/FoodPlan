@@ -10,14 +10,23 @@ class RecipeCategory(models.Model):
     description = models.TextField('Описание')
 
     class Meta:
-        verbose_name = 'Меню'
-        verbose_name_plural = 'Меню'
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
         indexes = [
             models.Index(fields=['name']),
         ]
 
     def __str__(self) -> str:
         return self.name
+
+
+class OrderQuerySet(models.QuerySet):
+    def with_price(self):
+        return self.annotate(
+            calories=models.Sum(
+                models.F('items__product_price') * models.F('items__quantity')
+            ),
+        )
 
 
 class Recipe(models.Model):
@@ -54,11 +63,8 @@ class Recipe(models.Model):
         null=True,
         blank=True,
     )
-    ingredient = models.ManyToManyField(
-        'Ingredient',
-        verbose_name='Ингредиенты',
-        related_name='recipes',
-    )
+
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -67,6 +73,14 @@ class Recipe(models.Model):
             models.Index(fields=['title']),
             models.Index(fields=['cooking_time']),
         ]
+
+    def get_total_calories(self):
+        recipe_ingredients = RecipeIngredient.objects.filter(recipe=self)
+        for recipe_ingredient in recipe_ingredients:
+            ingredient = recipe_ingredient.ingredient
+            quantity = recipe_ingredient.quantity
+            self.calories += ingredient.calories_per_100g * (quantity / 100)
+        return self.calories
 
     def __str__(self):
         return self.title
@@ -88,7 +102,6 @@ class AllergicCategory(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField('Название', max_length=150)
-    weight = models.FloatField('Вес(граммы)')
     calories_per_100g = models.PositiveSmallIntegerField('Калории на 100 г.')
     allergic_category = models.ForeignKey(
         AllergicCategory,
@@ -109,6 +122,19 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.FloatField('гр.')
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
+
+    def __str__(self):
+        return f'{self.ingredient.name} ({self.quantity} г)'
 
 
 class FoodIntake(models.Model):
