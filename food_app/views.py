@@ -15,7 +15,6 @@ from food_app.forms import OrderForm, PaymentForm
 from .models import Customer, Plan, Subscription
 
 
-
 def index(request):
     return render(request, 'food_app/pages/index.html')
 
@@ -24,10 +23,7 @@ def index(request):
 def account(request):
     if request.method == 'GET':
         customer = Customer.objects.get(user=request.user)
-        return render(
-            request, 'food_app/pages/account.html',
-            context={'customer': customer}
-        )
+        return render(request, 'food_app/pages/account.html', context={'customer': customer})
     elif request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
         user.username = request.POST['username']
@@ -57,7 +53,7 @@ def order(request):
         plan = Plan(
             price=1000,
             period=order_form.cleaned_data['period'],
-            recipe_category=order_form.cleaned_data['recipe_categories']
+            recipe_category=order_form.cleaned_data['recipe_categories'],
         )
         plan.save()
         plan.allergies.add(*order_form.cleaned_data['allergies'])
@@ -82,10 +78,9 @@ def order(request):
 
 @login_required
 def checkout(request):
-    subscription = Subscription.objects \
-        .filter(customer__user_id=request.user) \
-        .order_by('-start') \
-        .first()
+    subscription = (
+        Subscription.objects.filter(customer__user_id=request.user).order_by('-start').first()
+    )
 
     if request.method == 'POST':
         payment_form = PaymentForm(request.POST)
@@ -103,10 +98,7 @@ def checkout(request):
         idempotence_key = str(uuid.uuid4())
         payment = Payment.create(
             {
-                'amount': {
-                    'value': subscription.plan.price,
-                    'currency': 'RUB'
-                },
+                'amount': {'value': subscription.plan.price, 'currency': 'RUB'},
                 'payment_method_data': {
                     'type': 'bank_card',
                     'card': {
@@ -114,18 +106,21 @@ def checkout(request):
                         'expiry_year': f'20{payment_form.cleaned_data["card_year"]}',
                         'expiry_month': payment_form.cleaned_data['card_month'],
                         'csc': payment_form.cleaned_data["card_cvc"],
-                        'cardholder': payment_form.cleaned_data['card_name']
-                    }
+                        'cardholder': payment_form.cleaned_data['card_name'],
+                    },
                 },
                 'confirmation': {
                     'type': 'redirect',
-                    'return_url': request.build_absolute_uri(reverse('food_app:payment_confirmation'))
+                    'return_url': request.build_absolute_uri(
+                        reverse('food_app:payment_confirmation')
+                    ),
                 },
                 'metadata': {},
                 'capture': True,
                 'description': 'Оплата: подписка на сервис FoodPlan',
-                'test': True
-            }, idempotence_key
+                'test': True,
+            },
+            idempotence_key,
         )
         confirmation_url = payment.confirmation.confirmation_url
         request.session['payment_id'] = payment.id
@@ -162,10 +157,9 @@ def payment_confirmation(request):
         # TODO: add alert
         return redirect('food_app:order')
 
-
     if payment.status == 'succeeded':
         # TODO: add alert
-        subscription.is_active=True
+        subscription.is_active = True
         subscription.save()
         return redirect('food_app:account')
 
