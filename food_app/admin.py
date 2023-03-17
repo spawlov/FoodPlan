@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Recipe, Ingredient, RecipeIngredient, RecipeCategory
+from .models import AllergicCategory, FoodIntake, PlanPeriod, Recipe, Ingredient, RecipeIngredient, RecipeCategory, Subscription
 
 
 @admin.register(RecipeCategory)
@@ -67,3 +67,20 @@ class IngredientAdmin(admin.ModelAdmin):
         'calories_per_100g',
         'allergic_category',
     )
+
+
+@admin.register(PlanPeriod)
+class PlanPeriodAdmin(admin.ModelAdmin):
+    list_display = ['duration']
+
+@admin.register(FoodIntake)
+class FoodIntake(admin.ModelAdmin):
+    list_display = ['name']
+
+@admin.register(AllergicCategory)
+class AllergicCategory(admin.ModelAdmin):
+    list_display = ['name']
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ['start', 'end', 'is_active']

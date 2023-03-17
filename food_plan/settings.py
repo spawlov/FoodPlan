@@ -15,6 +15,9 @@ from pathlib import Path
 
 from environs import Env
 
+from yookassa import Configuration
+
+
 env = Env()
 env.read_env()
 
@@ -118,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -172,7 +175,6 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 DEFAULT_FROM_EMAIL = EMAIL
 LOGIN_REDIRECT_URL = '/'
-
 
 # CKEditor Config
 # https://pypi.org/project/django-ckeditor-5/
@@ -284,3 +286,8 @@ CKEDITOR_5_CONFIGS = {
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
+
+# Yookassa
+Configuration.account_id = env('YOOKASSA_SHOP_ID')
+Configuration.secret_key = env('YOOKASSA_CLIENT_SECRET')
