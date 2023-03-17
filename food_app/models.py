@@ -38,10 +38,6 @@ class Recipe(models.Model):
         null=True,
         blank=True,
     )
-    calories = models.PositiveSmallIntegerField(
-        'Калории(Ккал)',
-        default=0,
-    )
     cooking_time = models.PositiveSmallIntegerField(
         'Время готовки (мин)',
         default=1,

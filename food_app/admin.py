@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import (
     AllergicCategory,
     FoodIntake,
@@ -47,7 +48,7 @@ class RecipeAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.with_calories()
 
-    @admin.display(description='Каллории')
+    @admin.display(description='Калории')
     def total_calories(self, obj):
         return obj.total_calories
 
@@ -74,6 +75,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(PlanPeriod)
 class PlanPeriodAdmin(admin.ModelAdmin):
     list_display = ['duration']
+    list_filter = ['duration']
 
 
 @admin.register(FoodIntake)
