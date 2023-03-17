@@ -205,8 +205,8 @@ class Plan(models.Model):
 
 
 class Subscription(models.Model):
-    start = models.DateField('Начало подписки', auto_now_add=True)
-    end = models.DateField('Окончание подписки')
+    start = models.DateTimeField('Начало подписки', auto_now_add=True)
+    end = models.DateTimeField('Окончание подписки')
     is_active = models.BooleanField('Статус', default=False)
     plan = models.OneToOneField(
         Plan,

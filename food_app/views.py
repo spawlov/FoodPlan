@@ -1,3 +1,4 @@
+from re import sub
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -41,6 +42,7 @@ def account(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
+@login_required
 def order(request):
     if request.method == 'GET':
         order_form = OrderForm()
@@ -53,7 +55,7 @@ def order(request):
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
         plan = Plan(
-            price=5,
+            price=1000,
             period=order_form.cleaned_data['period'],
             recipe_category=order_form.cleaned_data['recipe_categories']
         )
@@ -73,41 +75,36 @@ def order(request):
         customer.subscriptions.add(subscription)
         customer.save()
 
-        return redirect(request, 'food_plan:index')
+        return redirect('food_app:checkout')
+
+    return redirect('food_app:order')
 
 
-
-        user = User.objects.get(pk=request.user.id)
-        print(user)
-        return render(request, 'food_app/pages/account.html')
-    return render(request, 'food_app/pages/account.html')
-
-
+@login_required
 def checkout(request):
-    if request.method == 'POST':
+    subscription = Subscription.objects \
+        .filter(customer__user_id=request.user) \
+        .order_by('-start') \
+        .first()
 
+    if request.method == 'POST':
         payment_form = PaymentForm(request.POST)
 
         if not payment_form.is_valid():
-            return render(request, 'food_app/pages/checkout.html', {'payment_form': payment_form})
-
-        subscription_plan = request.session.get('subscription_plan', None)
-
-        # if not subscription_plan:
-        #     # TODO: add alert
-        #     return redirect('food_app:order')
-        print('~~~~~~')
-        print('~~~~~~')
-        print('~~~~~~')
-        print('~~~~~~')
-        print(payment_form.cleaned_data)
+            return render(
+                request,
+                'food_app/pages/checkout.html',
+                {
+                    'payment_form': payment_form,
+                    'price': subscription.plan.price,
+                },
+            )
 
         idempotence_key = str(uuid.uuid4())
         payment = Payment.create(
             {
                 'amount': {
-                    # 'value': str(subscription_plan['price']),
-                    'value': '1000',
+                    'value': subscription.plan.price,
                     'currency': 'RUB'
                 },
                 'payment_method_data': {
@@ -122,7 +119,7 @@ def checkout(request):
                 },
                 'confirmation': {
                     'type': 'redirect',
-                    'return_url': request.build_absolute_uri(reverse('food_app:index'))
+                    'return_url': request.build_absolute_uri(reverse('food_app:payment_confirmation'))
                 },
                 'metadata': {},
                 'capture': True,
@@ -132,11 +129,49 @@ def checkout(request):
         )
         confirmation_url = payment.confirmation.confirmation_url
         request.session['payment_id'] = payment.id
+        request.session['subscription_id'] = subscription.id
         return redirect(confirmation_url)
 
     payment_form = PaymentForm()
     return render(
         request,
         'food_app/pages/checkout.html',
-        {'payment_form': payment_form},
+        {
+            'payment_form': payment_form,
+            'price': subscription.plan.price,
+        },
     )
+
+
+@login_required
+def payment_confirmation(request):
+    payment_id = request.session.get('payment_id')
+    subscription_id = request.session.get('subscription_id')
+
+    if not payment_id or not subscription_id:
+        # TODO: add alert
+        return redirect('food_app:order')
+
+    subscription = Subscription.objects.get(id=subscription_id)
+    payment = Payment.find_one(payment_id)
+
+    request.session.pop('payment_id', None)
+    request.session.pop('subscription_id', None)
+
+
+    if not subscription or not payment:
+        # TODO: add alert
+        return redirect('food_app:order')
+
+
+    if payment.status == 'succeeded':
+        # TODO: add alert
+        subscription.is_active=True
+        subscription.save()
+        return redirect('food_app:account')
+
+    # TODO: add alert
+    plan = subscription.plan
+    plan.delete()
+    subscription.delete()
+    return redirect('food_app:order')
