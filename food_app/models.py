@@ -16,7 +16,7 @@ class RecipeCategory(models.Model):
             models.Index(fields=['name']),
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
 
@@ -169,7 +169,7 @@ class PlanPeriod(models.Model):
         else:
             month = 'месяцев'
 
-        return f'Подписка на {self.duration} {month}'
+        return f'{self.duration} {month}'
 
 
 class Plan(models.Model):
