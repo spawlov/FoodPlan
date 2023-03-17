@@ -7,7 +7,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 
 class RecipeCategory(models.Model):
     name = models.CharField('Название', max_length=150)
-    description = models.TextField('Описание')
+    description = models.TextField('Описание', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Категория'
@@ -175,17 +175,14 @@ class PlanPeriod(models.Model):
 class Plan(models.Model):
     price = models.DecimalField('Цена', max_digits=12, decimal_places=2)
     persons = models.PositiveSmallIntegerField('Кол-во человек', default=1)
-    period = models.OneToOneField(
+    period = models.ForeignKey(
         PlanPeriod, verbose_name="Срок подписки", related_name='plan',
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
-    allergies = models.ForeignKey(
+    allergies = models.ManyToManyField(
         AllergicCategory,
         verbose_name='Аллергии',
         related_name='plans',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -203,8 +200,19 @@ class Subscription(models.Model):
     start = models.DateField('Начало подписки', auto_now_add=True)
     end = models.DateField('Окончание подписки')
     is_active = models.BooleanField('Статус', default=False)
-    plan = models.OneToOneField(Plan, verbose_name='План',
-                                on_delete=models.PROTECT)
+    plan = models.OneToOneField(
+        Plan,
+        verbose_name='План',
+        on_delete=models.PROTECT,
+    )
+    customer = models.ForeignKey(
+        'Customer',
+        verbose_name='Покупатель',
+        on_delete=models.SET_NULL,
+        related_name='subscriptions',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Подписка'
@@ -226,17 +234,9 @@ def get_uploading_path(instance, filename):
 class Customer(models.Model):
     user = models.OneToOneField(
         User,
-        related_name='users',
+        related_name='customer',
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
-    )
-    subscribe = models.OneToOneField(
-        Subscription,
-        related_name='subscribes',
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        verbose_name='Подписка'
     )
     avatar = models.ImageField(
         upload_to=get_uploading_path,
@@ -250,3 +250,4 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.user.username
+
