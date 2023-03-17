@@ -1,9 +1,9 @@
-from re import sub
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.contrib import messages
 
 from yookassa import Payment
 
@@ -35,6 +35,9 @@ def account(request):
             customer = Customer.objects.get(user=request.user)
             customer.avatar = request.FILES['avatar']
             customer.save()
+
+        messages.success(request, 'Данные успешно изменены.')
+
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
@@ -86,6 +89,7 @@ def checkout(request):
         payment_form = PaymentForm(request.POST)
 
         if not payment_form.is_valid():
+            messages.warning(request, 'Исправьте ошибки в данных карты.')
             return render(
                 request,
                 'food_app/pages/checkout.html',
@@ -147,23 +151,23 @@ def payment_confirmation(request):
     request.session.pop('subscription_id', None)
 
     if not payment_id or not subscription_id:
-        # TODO: add alert
+        messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
         return redirect('food_app:order')
 
     subscription = Subscription.objects.get(id=subscription_id)
     payment = Payment.find_one(payment_id)
 
     if not subscription or not payment:
-        # TODO: add alert
+        messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
         return redirect('food_app:order')
 
     if payment.status == 'succeeded':
-        # TODO: add alert
         subscription.is_active = True
         subscription.save()
+        messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
 
-    # TODO: add alert
+    messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
     plan = subscription.plan
     plan.delete()
     subscription.delete()
