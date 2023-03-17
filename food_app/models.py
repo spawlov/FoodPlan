@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth.models import User
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class RecipeCategory(models.Model):
@@ -21,10 +22,10 @@ class RecipeCategory(models.Model):
 
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
-    description = models.TextField('Описание')
+    description = CKEditor5Field('Описание')
     image = models.ImageField(upload_to='photos/%Y/%m/%d/',
                               verbose_name='Картинка', blank=True)
-    cooking_method = models.TextField('Способ приготовления')
+    cooking_method = CKEditor5Field('Способ приготовления')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     category = models.ForeignKey(
