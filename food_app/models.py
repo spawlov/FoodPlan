@@ -22,10 +22,10 @@ class RecipeCategory(models.Model):
 
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
-    description = CKEditor5Field('Описание')
+    description = CKEditor5Field('Описание', config_name='extends')
     image = models.ImageField(upload_to='photos/%Y/%m/%d/',
                               verbose_name='Картинка', blank=True)
-    cooking_method = CKEditor5Field('Способ приготовления')
+    cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     category = models.ForeignKey(
