@@ -148,16 +148,15 @@ def payment_confirmation(request):
     payment_id = request.session.get('payment_id')
     subscription_id = request.session.get('subscription_id')
 
+    request.session.pop('payment_id', None)
+    request.session.pop('subscription_id', None)
+
     if not payment_id or not subscription_id:
         # TODO: add alert
         return redirect('food_app:order')
 
     subscription = Subscription.objects.get(id=subscription_id)
     payment = Payment.find_one(payment_id)
-
-    request.session.pop('payment_id', None)
-    request.session.pop('subscription_id', None)
-
 
     if not subscription or not payment:
         # TODO: add alert
