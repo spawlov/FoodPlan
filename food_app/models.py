@@ -179,6 +179,14 @@ class Plan(models.Model):
         PlanPeriod, verbose_name="Срок подписки", related_name='plan',
         on_delete=models.PROTECT
     )
+    recipe_category = models.ForeignKey(
+        RecipeCategory,
+        verbose_name='Меню',
+        related_name='plans',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT
+    )
     allergies = models.ManyToManyField(
         AllergicCategory,
         verbose_name='Аллергии',
