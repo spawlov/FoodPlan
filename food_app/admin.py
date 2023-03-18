@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     AllergicCategory,
     FoodIntake,
+    Plan,
     PlanPeriod,
     Product,
     Recipe,
