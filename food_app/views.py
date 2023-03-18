@@ -11,7 +11,7 @@ from calendar import mdays
 from datetime import datetime, timedelta
 import uuid
 
-from food_app.forms import OrderForm, OrderForm2, PaymentForm
+from food_app.forms import OrderForm, PaymentForm
 from .models import Customer, Plan, Subscription
 
 
@@ -24,6 +24,7 @@ def account(request):
     if request.method == 'GET':
         customer = Customer.objects.get(user=request.user)
         return render(request, 'food_app/pages/account.html', context={'customer': customer})
+
     elif request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
         user.username = request.POST['username']
@@ -45,13 +46,11 @@ def account(request):
 def order(request):
     if request.method == 'GET':
         order_form = OrderForm()
-        order_form2 = OrderForm2()
         return render(
             request,
             'food_app/pages/order.html',
             {
                 'order_form': order_form,
-                'order_form2': order_form2
             },
         )
 
@@ -64,7 +63,7 @@ def order(request):
         plan = Plan(
             price=1000,
             period=order_form.cleaned_data['period'],
-            recipe_category=order_form.cleaned_data['recipe_categories'],
+            recipe_category=order_form.cleaned_data['recipe_category'],
         )
         plan.save()
         plan.allergies.add(*order_form.cleaned_data['allergies'])
