@@ -74,6 +74,17 @@
       <form id="order" action="{% url 'food_app:order' %}" method="POST">
         {% csrf_token %}
         <table class="table text-center text-truncate mb-5">
+          <div>
+            {% if order_form.errors %}
+              <ul class="alert alert-danger" role="alert">
+                  {% for field in order_form %}
+                      {% for error in field.errors %}
+                          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                      {% endfor %}
+                  {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
           <tbody>
             <tr>
               <th scope="row" class="text-start">Срок</th>
