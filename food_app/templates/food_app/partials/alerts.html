@@ -1,0 +1,20 @@
+{% if messages %}
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            {<script>
+                alertify.set('notifier', 'position', 'bottom-right');
+                alertify.error('{{message}}');
+            </script>}
+        {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            <script>
+                alertify.set('notifier', 'position', 'bottom-right');
+                alertify.success('{{message}}');
+            </script>
+        {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+            <script>
+                alertify.set('notifier', 'position', 'bottom-right');
+                alertify.warning('{{message}}');
+            </script>
+        {% endif %}
+    {% endfor %}
+{% endif %}

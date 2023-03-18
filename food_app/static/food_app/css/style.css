@@ -245,3 +245,12 @@ body {
         background-color: #91B93E;
     }
 }
+
+
+.alertify-notifier {
+    opacity: 0.8;
+}
+
+.alertify-notifier .ajs-message{
+	bottom: 150px;
+}
