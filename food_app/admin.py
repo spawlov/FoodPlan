@@ -35,6 +35,19 @@ class IngredientInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Plan)
+class PlanAdmin(admin.ModelAdmin):
+    readonly_fields = ['price']
+    list_display = (
+        'price',
+        'persons',
+    )
+    list_filter = (
+        'price',
+        'persons',
+    )
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [IngredientInline]
