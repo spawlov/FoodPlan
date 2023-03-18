@@ -28,6 +28,25 @@ class OrderForm(forms.Form):
     )
 
 
+class OrderForm2(forms.ModelForm):
+    error_css_class = 'text-danger fw-semibold'
+
+    class Meta:
+        model = Plan
+        fields = ['persons', 'period', 'allergies', 'food_intakes', 'recipe_category']
+        widgets = {
+            'recipe_category': forms.Select(attrs={'class': 'form-select'}),
+            'food_intakes': forms.CheckboxSelectMultiple(
+                attrs={'class': 'form-check-input me-1 foodplan_checked-green'},
+            ),
+            'allergies': forms.CheckboxSelectMultiple(
+                attrs={'class': 'form-check-input me-1 foodplan_checked-green'},
+            ),
+            'period': forms.Select(attrs={'class': 'form-select'}),
+            # PERSONS
+        }
+
+
 class PaymentForm(forms.Form):
     card_name = forms.CharField(min_length=2, label='Имя владельца')
     card_number = forms.CharField(min_length=16, max_length=16, label='Номер карты')

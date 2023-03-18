@@ -71,7 +71,10 @@
         </div>
       </div>
       <h2><strong>Выберите подходящий тариф</strong></h2>
-      <form id="order" action="{% url 'food_app:order' %}" method="POST">
+
+      {{ order_form }}
+
+      {% comment %} <form id="order" action="{% url 'food_app:order' %}" method="POST">
         {% csrf_token %}
         <table class="table text-center text-truncate mb-5">
           <tbody>
@@ -116,7 +119,7 @@
           </tbody>
         </table>
         <button type="submit" id="TableSubmit" class="d-none"></button>
-      </form>
+      </form> {% endcomment %}
 
       <form
         class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey"

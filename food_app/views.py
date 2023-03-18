@@ -11,7 +11,7 @@ from calendar import mdays
 from datetime import datetime, timedelta
 import uuid
 
-from food_app.forms import OrderForm, PaymentForm
+from food_app.forms import OrderForm, OrderForm2, PaymentForm
 from .models import Customer, Plan, Subscription
 
 
@@ -45,7 +45,15 @@ def account(request):
 def order(request):
     if request.method == 'GET':
         order_form = OrderForm()
-        return render(request, 'food_app/pages/order.html', {'order_form': order_form})
+        order_form2 = OrderForm2()
+        return render(
+            request,
+            'food_app/pages/order.html',
+            {
+                'order_form': order_form,
+                'order_form2': order_form2
+            },
+        )
 
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
