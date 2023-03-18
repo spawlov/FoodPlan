@@ -1,10 +1,9 @@
+from dataclasses import field
 import os
 
 from django.contrib.auth.models import User
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
-
-from food_app.querysets import RecipeQuerySet
 
 
 class RecipeCategory(models.Model):
@@ -25,11 +24,18 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = CKEditor5Field('Описание', config_name='extends')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
-                              verbose_name='Картинка', blank=True)
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
     cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+    price = models.DecimalField(
+        'Стоимость блюда',
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    calories = models.PositiveSmallIntegerField('Калории', null=True, blank=True)
     category = models.ForeignKey(
         RecipeCategory,
         verbose_name='Меню',
@@ -53,14 +59,14 @@ class Recipe(models.Model):
         blank=True,
     )
 
-    objects = RecipeQuerySet.as_manager()
-
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         indexes = [
             models.Index(fields=['title']),
             models.Index(fields=['cooking_time']),
+            models.Index(fields=['calories']),
+            models.Index(fields=['price']),
         ]
 
     def __str__(self):
@@ -106,6 +112,16 @@ class Product(models.Model):
 
 
 class Ingredient(models.Model):
+
+    class UnitChoice(models.TextChoices):
+        GRAMM = 'gram', 'гр.'
+        ITEM = 'item', 'шт.'
+        SLICE = 'slice', 'дол.'
+        SPOON_SMALL = 'spoon_small', 'ч.л.'
+        SPOON = 'spoon', 'ст.л.'
+        VOLUME = 'volume', 'мл.'
+        PITCH = 'pitch', 'щеп.'
+
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
@@ -118,7 +134,12 @@ class Ingredient(models.Model):
         related_name='ingredients',
         on_delete=models.CASCADE,
     )
-    quantity = models.FloatField('гр.')
+    unit = models.CharField(
+        'Единицы',
+        max_length=20,
+        choices=UnitChoice.choices,
+    )
+    quantity = models.FloatField('Количество')
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
@@ -154,7 +175,7 @@ class PlanPeriod(models.Model):
         if self.duration % 10 == 1 and self.duration % 100 != 11:
             month = 'месяц'
         elif 2 <= self.duration % 10 <= 4 and (
-                self.duration % 100 < 10 or self.duration % 100 >= 20
+            self.duration % 100 < 10 or self.duration % 100 >= 20
         ):
             month = 'месяца'
         else:
@@ -164,7 +185,6 @@ class PlanPeriod(models.Model):
 
 
 class Plan(models.Model):
-
     class PersonChoice(models.IntegerChoices):
         ONE = 1, '1 человек'
         TWO = 2, '2 человека'
@@ -179,8 +199,7 @@ class Plan(models.Model):
         default=PersonChoice.ONE,
     )
     period = models.ForeignKey(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
-        on_delete=models.PROTECT
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.PROTECT
     )
     recipe_category = models.ForeignKey(
         RecipeCategory,
@@ -188,7 +207,7 @@ class Plan(models.Model):
         related_name='plans',
         null=True,
         blank=True,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
     )
     allergies = models.ManyToManyField(
         AllergicCategory,
@@ -250,16 +269,9 @@ def get_uploading_path(instance, filename):
 
 class Customer(models.Model):
     user = models.OneToOneField(
-        User,
-        related_name='customer',
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        User, related_name='customer', on_delete=models.CASCADE, verbose_name='Пользователь'
     )
-    avatar = models.ImageField(
-        upload_to=get_uploading_path,
-        blank=True,
-        verbose_name='Аватар'
-    )
+    avatar = models.ImageField(upload_to=get_uploading_path, blank=True, verbose_name='Аватар')
 
     class Meta:
         verbose_name = 'Пользователь'
