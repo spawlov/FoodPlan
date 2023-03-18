@@ -1,4 +1,3 @@
-from curses import panel
 from django import forms
 
 from food_app.models import Plan, PlanPeriod, RecipeCategory
