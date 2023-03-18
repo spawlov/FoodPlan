@@ -1,41 +1,23 @@
+from curses import panel
 from django import forms
 
 from food_app.models import FoodIntake, Plan, AllergicCategory, PlanPeriod, RecipeCategory
 
 
-class OrderForm(forms.Form):
-    recipe_categories = forms.ModelChoiceField(
-        queryset=RecipeCategory.objects.all(), widget=forms.Select(attrs={'class': 'form-select'})
-    )
-    food_intakes = forms.ModelMultipleChoiceField(
-        queryset=FoodIntake.objects.all(),
-        widget=forms.CheckboxSelectMultiple(
-            attrs={'class': 'form-check-input me-1 foodplan_checked-green'}
-        ),
-    )
-    allergies = forms.ModelMultipleChoiceField(
-        queryset=AllergicCategory.objects.all(),
-        widget=forms.CheckboxSelectMultiple(
-            attrs={'class': 'form-check-input me-1 foodplan_checked-green'}
-        ),
-    )
-    period = forms.ModelChoiceField(
-        queryset=PlanPeriod.objects.all(), widget=forms.Select(attrs={'class': 'form-select'})
-    )
-    persons = forms.ChoiceField(
-        choices=[(count, count) for count in range(1, 7)],
-        widget=forms.Select(attrs={'class': 'form-select'}),
-    )
+class BaseAuthorFormSet(forms.BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queryset = AllergicCategory.objects.filter(name__startswith='O')
 
 
-class OrderForm2(forms.ModelForm):
+class OrderForm(forms.ModelForm):
     error_css_class = 'text-danger fw-semibold'
 
     class Meta:
         model = Plan
         fields = ['persons', 'period', 'allergies', 'food_intakes', 'recipe_category']
         widgets = {
-            'recipe_category': forms.Select(attrs={'class': 'form-select'}),
+            'recipe_category': forms.Select(attrs={'class': 'form-select'}, ),
             'food_intakes': forms.CheckboxSelectMultiple(
                 attrs={'class': 'form-check-input me-1 foodplan_checked-green'},
             ),
@@ -43,8 +25,21 @@ class OrderForm2(forms.ModelForm):
                 attrs={'class': 'form-check-input me-1 foodplan_checked-green'},
             ),
             'period': forms.Select(attrs={'class': 'form-select'}),
-            # PERSONS
+            'persons': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(OrderForm, self).__init__(*args, **kwargs)
+
+        recipe_categories = RecipeCategory.objects.order_by('name')
+        periods = PlanPeriod.objects.order_by('duration')
+
+        self.fields['recipe_category'].initial = recipe_categories.first()
+        self.fields['period'].initial = periods.first()
+
+        self.fields['recipe_category'].empty_label = None
+        self.fields['period'].empty_label = None
+        self.fields['food_intakes'].empty_label = None
 
 
 class PaymentForm(forms.Form):
