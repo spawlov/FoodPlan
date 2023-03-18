@@ -10,6 +10,7 @@ from .models import (
     Ingredient,
     RecipeCategory,
     Subscription,
+    Promocode,
 )
 
 
@@ -37,12 +38,23 @@ class IngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [IngredientInline]
-    list_display = ('title', 'category', 'cooking_time', 'food_intake')
+    list_display = (
+        'title',
+        'category',
+        'cooking_time',
+        'food_intake',
+        'price',
+    )
     list_filter = (
         'category',
         'food_intake',
+        'price',
     )
-    search_fields = ('title', 'description', 'cooking_method')
+    search_fields = (
+        'title',
+        'description',
+        'cooking_method'
+    )
 
 
 @admin.register(Product)
@@ -83,3 +95,19 @@ class AllergicCategory(admin.ModelAdmin):
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['start', 'end', 'is_active']
+
+
+@admin.register(Promocode)
+class PromocodeAdmin(admin.ModelAdmin):
+    list_display = [
+        'promocode',
+        'start_at',
+        'end_at',
+        'discount'
+    ]
+    list_filter = [
+        'promocode',
+        'start_at',
+        'end_at',
+        'discount'
+    ]

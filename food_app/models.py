@@ -3,7 +3,6 @@ import os
 from django.contrib.auth.models import User
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
-from wrapt.decorators import DelegatedAdapterFactory
 
 
 class RecipeCategory(models.Model):
@@ -112,7 +111,6 @@ class Product(models.Model):
 
 
 class Ingredient(models.Model):
-
     class UnitChoice(models.TextChoices):
         GRAMM = 'gram', 'гр.'
         ITEM = 'item', 'шт.'
@@ -185,7 +183,7 @@ class PlanPeriod(models.Model):
         if self.duration % 10 == 1 and self.duration % 100 != 11:
             month = 'месяц'
         elif 2 <= self.duration % 10 <= 4 and (
-            self.duration % 100 < 10 or self.duration % 100 >= 20
+                self.duration % 100 < 10 or self.duration % 100 >= 20
         ):
             month = 'месяца'
         else:
@@ -260,6 +258,14 @@ class Subscription(models.Model):
         null=True,
         blank=True,
     )
+    promocode = models.ForeignKey(
+        'Promocode',
+        verbose_name='Промокод',
+        on_delete=models.SET_NULL,
+        related_name='subscriptions',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Подписка'
@@ -290,3 +296,22 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class Promocode(models.Model):
+    promocode = models.CharField(max_length=10)
+    start_at = models.DateField("Начало действия промокода")
+    end_at = models.DateField("Конец действия промокода")
+    discount = models.SmallIntegerField("Размер скидки")
+
+    class Meta:
+        verbose_name = 'Промокод'
+        verbose_name_plural = 'Промокоды'
+        indexes = [
+            models.Index(fields=['start_at']),
+            models.Index(fields=['end_at']),
+            models.Index(fields=['discount']),
+        ]
+
+    def __str__(self):
+        return self.promocode
