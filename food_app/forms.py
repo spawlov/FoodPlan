@@ -1,10 +1,14 @@
-from django import forms
+from datetime import date
 
-from food_app.models import Plan, PlanPeriod, RecipeCategory
+from django import forms
+from django.core.exceptions import ObjectDoesNotExist
+from food_app.models import Plan, PlanPeriod, RecipeCategory, Promocode
 
 
 class OrderForm(forms.ModelForm):
     error_css_class = 'text-danger fw-semibold'
+    promo_code = forms.CharField(required=False, label='Промокод')
+
 
     class Meta:
         model = Plan
@@ -35,6 +39,21 @@ class OrderForm(forms.ModelForm):
         self.fields['food_intakes'].empty_label = None
 
         self.fields['allergies'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        promo_code = cleaned_data.get('promocode')
+        if promo_code:
+            try:
+                promocode = Promocode.objects.get(promocode=promo_code,
+                                                  start_at__lte=date.today(),
+                                                  end_at__gte=date.today())
+                cleaned_data['discount'] = promocode.discount
+            except ObjectDoesNotExist:
+                self.add_error('promo_code', 'Недействительный промокод')
+        else:
+            cleaned_data['discount'] = 0
+        return cleaned_data
 
 
 class PaymentForm(forms.Form):
