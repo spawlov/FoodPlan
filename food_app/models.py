@@ -194,12 +194,12 @@ class Plan(models.Model):
         AllergicCategory,
         verbose_name='Аллергии',
         related_name='plans',
+        blank=True,
     )
-    food_intakes = models.ForeignKey(
+    food_intakes = models.ManyToManyField(
         FoodIntake,
         verbose_name='Приемы пищи',
         related_name='plans',
-        on_delete=models.PROTECT,
     )
 
     class Meta:

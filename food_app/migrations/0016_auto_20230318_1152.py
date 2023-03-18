@@ -14,12 +14,28 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='plan',
             name='food_intakes',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='plans', to='food_app.foodintake', verbose_name='Приемы пищи'),
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name='plans',
+                to='food_app.foodintake',
+                verbose_name='Приемы пищи',
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='plan',
             name='persons',
-            field=models.PositiveSmallIntegerField(choices=[(1, '1 человек'), (2, '2 человека'), (3, '3 человека'), (4, '4 человека'), (5, '5 человек')], default=1, verbose_name='Кол-во человек'),
+            field=models.PositiveSmallIntegerField(
+                choices=[
+                    (1, '1 человек'),
+                    (2, '2 человека'),
+                    (3, '3 человека'),
+                    (4, '4 человека'),
+                    (5, '5 человек'),
+                ],
+                default=1,
+                verbose_name='Кол-во человек',
+            ),
         ),
     ]
