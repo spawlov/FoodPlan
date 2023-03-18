@@ -164,8 +164,20 @@ class PlanPeriod(models.Model):
 
 
 class Plan(models.Model):
+
+    class PersonChoice(models.IntegerChoices):
+        ONE = 1, '1 человек'
+        TWO = 2, '2 человека'
+        THREE = 3, '3 человека'
+        FOUR = 4, '4 человека'
+        FIVE = 5, '5 человек'
+
     price = models.DecimalField('Цена', max_digits=12, decimal_places=2)
-    persons = models.PositiveSmallIntegerField('Кол-во человек', default=1)
+    persons = models.PositiveSmallIntegerField(
+        'Кол-во человек',
+        choices=PersonChoice.choices,
+        default=PersonChoice.ONE,
+    )
     period = models.ForeignKey(
         PlanPeriod, verbose_name="Срок подписки", related_name='plan',
         on_delete=models.PROTECT
@@ -182,6 +194,12 @@ class Plan(models.Model):
         AllergicCategory,
         verbose_name='Аллергии',
         related_name='plans',
+    )
+    food_intakes = models.ForeignKey(
+        FoodIntake,
+        verbose_name='Приемы пищи',
+        related_name='plans',
+        on_delete=models.PROTECT,
     )
 
     class Meta:
