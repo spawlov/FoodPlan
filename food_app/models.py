@@ -1,9 +1,9 @@
-from dataclasses import field
 import os
 
 from django.contrib.auth.models import User
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
+from wrapt.decorators import DelegatedAdapterFactory
 
 
 class RecipeCategory(models.Model):
@@ -151,6 +151,11 @@ class Ingredient(models.Model):
 
 class FoodIntake(models.Model):
     name = models.CharField('Прием пищи', max_length=30)
+    price = models.DecimalField(
+        'Стоимость категории',
+        max_digits=8,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = 'Прием пищи'
@@ -165,6 +170,11 @@ class FoodIntake(models.Model):
 
 class PlanPeriod(models.Model):
     duration = models.PositiveSmallIntegerField('Срок подписки', default=1)
+    price = price = models.DecimalField(
+        'Стоимость периода',
+        max_digits=8,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = 'Срок подписки'
@@ -236,10 +246,11 @@ class Subscription(models.Model):
     start = models.DateTimeField('Начало подписки', auto_now_add=True)
     end = models.DateTimeField('Окончание подписки')
     is_active = models.BooleanField('Статус', default=False)
+    paid = models.BooleanField('Статус оплаты', default=False)
     plan = models.OneToOneField(
         Plan,
         verbose_name='План',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     customer = models.ForeignKey(
         'Customer',
