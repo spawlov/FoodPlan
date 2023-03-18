@@ -1,13 +1,7 @@
 from curses import panel
 from django import forms
 
-from food_app.models import FoodIntake, Plan, AllergicCategory, PlanPeriod, RecipeCategory
-
-
-class BaseAuthorFormSet(forms.BaseModelFormSet):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.queryset = AllergicCategory.objects.filter(name__startswith='O')
+from food_app.models import Plan, PlanPeriod, RecipeCategory
 
 
 class OrderForm(forms.ModelForm):
@@ -40,6 +34,8 @@ class OrderForm(forms.ModelForm):
         self.fields['recipe_category'].empty_label = None
         self.fields['period'].empty_label = None
         self.fields['food_intakes'].empty_label = None
+
+        self.fields['allergies'].required = True
 
 
 class PaymentForm(forms.Form):
