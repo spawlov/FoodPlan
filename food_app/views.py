@@ -60,8 +60,12 @@ def order(request):
         if not order_form.is_valid():
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
+        price = order_form.cleaned_data['period'].price
+        for food_intake in order_form.cleaned_data['food_intakes']:
+            price += food_intake.price
+
         plan = Plan(
-            price=1000,
+            price=price,
             period=order_form.cleaned_data['period'],
             recipe_category=order_form.cleaned_data['recipe_category'],
         )
