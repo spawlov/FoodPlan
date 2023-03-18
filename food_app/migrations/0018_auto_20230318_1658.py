@@ -14,19 +14,36 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='foodintake',
             name='price',
-            field=models.DecimalField(decimal_places=2, default=100, max_digits=8, verbose_name='Стоимость категории'),
+            field=models.DecimalField(
+                decimal_places=2, default=100, max_digits=8, verbose_name='Стоимость категории'
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='ingredient',
             name='unit',
-            field=models.CharField(choices=[('gram', 'гр.'), ('item', 'шт.'), ('slice', 'дол.'), ('spoon_small', 'ч.л.'), ('spoon', 'ст.л.'), ('volume', 'мл.'), ('pitch', 'щеп.')], default=1, max_length=20, verbose_name='Единицы'),
+            field=models.CharField(
+                choices=[
+                    ('gram', 'гр.'),
+                    ('item', 'шт.'),
+                    ('slice', 'дол.'),
+                    ('spoon_small', 'ч.л.'),
+                    ('spoon', 'ст.л.'),
+                    ('volume', 'мл.'),
+                    ('pitch', 'щеп.'),
+                ],
+                default=1,
+                max_length=20,
+                verbose_name='Единицы',
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='planperiod',
             name='price',
-            field=models.DecimalField(decimal_places=2, default=100, max_digits=8, verbose_name='Стоимость периода'),
+            field=models.DecimalField(
+                decimal_places=2, default=100, max_digits=8, verbose_name='Стоимость периода'
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -37,7 +54,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='recipe',
             name='price',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True, verbose_name='Стоимость блюда'),
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                max_digits=8,
+                null=True,
+                verbose_name='Стоимость блюда',
+            ),
         ),
         migrations.AddField(
             model_name='subscription',
@@ -52,7 +75,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='subscription',
             name='plan',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='food_app.plan', verbose_name='План'),
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to='food_app.plan', verbose_name='План'
+            ),
         ),
         migrations.AddIndex(
             model_name='recipe',

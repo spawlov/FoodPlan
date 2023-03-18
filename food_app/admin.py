@@ -42,16 +42,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'category',
         'food_intake',
     )
-    readonly_fields = ('total_calories',)
     search_fields = ('title', 'description', 'cooking_method')
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.with_calories()
-
-    @admin.display(description='Калории')
-    def total_calories(self, obj):
-        return obj.total_calories
 
 
 @admin.register(Product)
