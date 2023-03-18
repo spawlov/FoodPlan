@@ -35,8 +35,6 @@ class OrderForm(forms.ModelForm):
         self.fields['period'].empty_label = None
         self.fields['food_intakes'].empty_label = None
 
-        self.fields['allergies'].required = True
-
 
 class PaymentForm(forms.Form):
     card_name = forms.CharField(min_length=2, label='Имя владельца')
