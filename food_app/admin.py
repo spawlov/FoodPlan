@@ -69,7 +69,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'description',
         'cooking_method'
     )
-    search_fields = ('title', 'description', 'cooking_method')
 
 
 @admin.register(Product)
