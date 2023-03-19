@@ -150,23 +150,23 @@
                                                                                 Ингридиенты и способ приготовления:
                                                                             </button>
                                                                         </h2>
-                                                                        <div id="panelsStayOpen-collapse-{{ item.pk }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading-{{ item.pk }}"">
-                                                                        <div class="accordion-body">
-                                                                            <p>Калорийность блюда: {{ item.recipe.calories }}ккал.</p>
-                                                                            <p>Стоимость блюда: {{ item.recipe.price }}&#8381;</p>
-                                                                            Ингредиенты:
-                                                                            <ul>
-                                                                                {% for recipe_item in item.recipe.ingredients.get_queryset %}
-                                                                                    <li>{{ recipe_item.product.name }}: {{ recipe_item.quantity }}{{ recipe_item.get_unit_display }}</li>
-                                                                                {% endfor %}
-                                                                            </ul>
-                                                                            {{ item.recipe.cooking_method|safe }}
+                                                                        <div id="panelsStayOpen-collapse-{{ item.pk }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading-{{ item.pk }}">
+                                                                            <div class="accordion-body">
+                                                                                <p>Калорийность блюда: {{ item.recipe.calories }}ккал.</p>
+                                                                                <p>Стоимость блюда: {{ item.recipe.price }}&#8381;</p>
+                                                                                Ингредиенты:
+                                                                                <ul>
+                                                                                    {% for recipe_item in item.recipe.ingredients.get_queryset %}
+                                                                                        <li>{{ recipe_item.product.name }}: {{ recipe_item.quantity }}{{ recipe_item.get_unit_display }}</li>
+                                                                                    {% endfor %}
+                                                                                </ul>
+                                                                                {{ item.recipe.cooking_method|safe }}
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
                                                     </div>
                                                 {% endif %}
                                             {% endfor %}
@@ -174,7 +174,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
