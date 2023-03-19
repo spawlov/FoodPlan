@@ -156,11 +156,6 @@ class Ingredient(models.Model):
 
 class FoodIntake(models.Model):
     name = models.CharField('Прием пищи', max_length=30)
-    price = models.DecimalField(
-        'Стоимость категории',
-        max_digits=8,
-        decimal_places=2,
-    )
 
     class Meta:
         verbose_name = 'Прием пищи'
