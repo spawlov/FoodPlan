@@ -1,4 +1,6 @@
 import random
+
+from django.db.models import Count, Sum, F
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -40,13 +42,18 @@ def account(request):
         menus = []
         step_counter = 0
         steps_link = []
+        calories_list = []
         while request_date < timezone.now() + timedelta(days=7):
             item = Menu.objects.filter(
                 subscription=subscription.last(),
                 date=request_date
-            )
+            ).prefetch_related('recipe__ingredients')
+
             if not item.exists():
                 break
+            calories_list.append(
+                item.aggregate(calories=Sum('recipe_id__calories'))
+            )
             menus.append(item)
             steps_link.append(step_counter)
             request_date += timedelta(days=1)
@@ -57,7 +64,8 @@ def account(request):
             )
         except ValueError:
             date_compare = timezone.now()
-
+        calories = calories_list[int(request.GET.get("step", 0))]['calories']
+        print()
         return render(
             request,
             'food_app/pages/account.html',
@@ -67,6 +75,7 @@ def account(request):
                 'menus': menus,
                 'date_compare': date_compare.date(),
                 'steps_link': steps_link,
+                'calories': calories,
             }
         )
 
