@@ -1,0 +1,29 @@
+<div class="row mb-5">
+{% for group, options, index in widget.optgroups %}
+    {% for option in options %}
+      <div class="col-6 col-md-3">
+        {% if option.value %}
+          <h5 class="text-secondary mb-2 text-center">{{option.attrs.name}}</h5>
+          <label for="{{ widget.attrs.id }}_{{ option.index }}" class="position-relative" style="cursor: pointer">
+            <img src="{{ option.attrs.image }}" alt="{{ option.label }}" class="w-100">
+            <input type="radio"
+                   name="{{ widget.name }}"
+                   id="{{ widget.attrs.id }}_{{ option.index }}"
+                   value="{{ option.value }}"
+                   {% if widget.is_required %}
+                   required{% endif %}
+                   {% if forloop.parentloop.first %}
+                      checked
+                   {% endif %}
+                   {% if widget.attrs %}
+                   {% for attr, value in widget.attrs.items %}
+                   {{ attr }}="{{ value }}"{% endfor %}
+                   {% endif %}
+                  >
+            <div class="img_selected" id="img{{ option.index }}"></div>
+          </label>
+        {% endif %}
+      </div>
+    {% endfor %}
+    {% endfor %}
+  </div>

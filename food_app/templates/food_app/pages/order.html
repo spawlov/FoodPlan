@@ -3,76 +3,17 @@
 <main style="margin-top: calc(2rem + 85px)">
   <section>
     <div class="container">
-      <h1><strong class="foodplan_green">1 шаг </strong>до первого меню</h1>
-      <h5 class="text-secondary mb-3">
-        Вам будет доступно 4 типа меню: Классическое, Низкоуглеводное,
-        Вегетарианское и Кето.
-      </h5>
-      <div class="row mb-5">
-        <div class="col-6 col-md-3">
-          <label
-            for="classic"
-            class="position-relative"
-            style="cursor: pointer"
-          >
-            <img src="img/menu_classical.png" alt="" class="w-100" />
-            <input
-              form="order"
-              type="radio"
-              name="foodtype"
-              id="classic"
-              value="classic"
-              class="foodplan_selected d-none"
-            />
-            <div class="img_selected" id="img1"></div>
-          </label>
-        </div>
-        <div class="col-6 col-md-3">
-          <label for="low" class="position-relative" style="cursor: pointer">
-            <img src="img/menu_nizkougl.png" alt="" class="w-100" />
-            <input
-              form="order"
-              type="radio"
-              name="foodtype"
-              id="low"
-              value="low"
-              class="foodplan_selected d-none"
-            />
-            <div class="img_selected" id="img2"></div>
-          </label>
-        </div>
-        <div class="col-6 col-md-3">
-          <label for="veg" class="position-relative" style="cursor: pointer">
-            <img src="img/menu_veg.png" alt="" class="w-100" />
-            <input
-              form="order"
-              type="radio"
-              name="foodtype"
-              id="veg"
-              value="veg"
-              class="foodplan_selected d-none"
-            />
-            <div class="img_selected" id="img3"></div>
-          </label>
-        </div>
-        <div class="col-6 col-md-3">
-          <label for="keto" class="position-relative" style="cursor: pointer">
-            <img src="img/menu_keto.png" alt="" class="w-100" />
-            <input
-              form="order"
-              type="radio"
-              name="foodtype"
-              id="keto"
-              value="keto"
-              class="foodplan_selected d-none"
-            />
-            <div class="img_selected" id="img4"></div>
-          </label>
-        </div>
-      </div>
-      <h2><strong>Выберите подходящий тариф</strong></h2>
       <form id="order" action="{% url 'food_app:order' %}" method="POST">
         {% csrf_token %}
+
+        <h1><strong class="foodplan_green">1 шаг </strong>до первого меню</h1>
+        <h5 class="foodplan_green mb-3">
+          Вам будет доступно 4 типа меню:
+        </h5>
+
+        {{ order_form.recipe_category }}
+
+        <h2><strong>Выберите подходящий тариф</strong></h2>
         <table class="table text-center text-truncate mb-5">
           <div>
             {% if order_form.errors %}
@@ -91,12 +32,6 @@
               <td>
                  {{ order_form.period }}
               </td>
-            </tr>
-            <tr>
-                <th scope="row" class="text-start">Меню</th>
-                <td>
-                    {{ order_form.recipe_category }}
-                </td>
             </tr>
             <tr>
               <th scope="row" class="text-start">Кол-во персон</th>

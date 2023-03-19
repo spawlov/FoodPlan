@@ -9,6 +9,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 class RecipeCategory(models.Model):
     name = models.CharField('Название', max_length=150)
     description = models.TextField('Описание', null=True, blank=True)
+    image = models.ImageField('Картинка', upload_to='photos/%Y/%m/%d/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Категория'
@@ -20,14 +21,11 @@ class RecipeCategory(models.Model):
     def __str__(self):
         return self.name
 
-
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = CKEditor5Field('Описание', config_name='extends')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
-                              verbose_name='Картинка', blank=True)
-    cooking_method = CKEditor5Field('Способ приготовления',
-                                    config_name='extends')
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
+    cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     price = models.DecimalField(
@@ -37,8 +35,7 @@ class Recipe(models.Model):
         null=True,
         blank=True,
     )
-    calories = models.PositiveSmallIntegerField('Калории', null=True,
-                                                blank=True)
+    calories = models.PositiveSmallIntegerField('Калории', null=True, blank=True)
     category = models.ForeignKey(
         RecipeCategory,
         verbose_name='Меню',
@@ -188,7 +185,7 @@ class PlanPeriod(models.Model):
         if self.duration % 10 == 1 and self.duration % 100 != 11:
             month = 'месяц'
         elif 2 <= self.duration % 10 <= 4 and (
-                self.duration % 100 < 10 or self.duration % 100 >= 20
+            self.duration % 100 < 10 or self.duration % 100 >= 20
         ):
             month = 'месяца'
         else:
@@ -212,8 +209,7 @@ class Plan(models.Model):
         default=PersonChoice.ONE,
     )
     period = models.ForeignKey(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
-        on_delete=models.PROTECT
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.PROTECT
     )
     recipe_category = models.ForeignKey(
         RecipeCategory,
@@ -292,11 +288,9 @@ def get_uploading_path(instance, filename):
 
 class Customer(models.Model):
     user = models.OneToOneField(
-        User, related_name='customer', on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        User, related_name='customer', on_delete=models.CASCADE, verbose_name='Пользователь'
     )
-    avatar = models.ImageField(upload_to=get_uploading_path, blank=True,
-                               verbose_name='Аватар')
+    avatar = models.ImageField(upload_to=get_uploading_path, blank=True, verbose_name='Аватар')
 
     class Meta:
         verbose_name = 'Пользователь'
