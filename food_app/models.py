@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.fields import related
 from django_ckeditor_5.fields import CKEditor5Field
 
 
@@ -41,6 +42,12 @@ class Recipe(models.Model):
         related_name='recipes',
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
+    )
+    allergic_categories = models.ManyToManyField(
+        'AllergicCategory',
+        verbose_name='Категории аллергенов',
+        related_name='recipes',
         blank=True,
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -315,3 +322,26 @@ class Promocode(models.Model):
 
     def __str__(self):
         return self.promocode
+
+
+class MenuItem(models.Model):
+    date = models.DateField('Дата')
+    food_intake = models.ForeignKey(
+        FoodIntake,
+        verbose_name='Прием пищи',
+        related_name='menu_items',
+        on_delete=models.CASCADE,
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт',
+        related_name='menu_items',
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = 'Пункт меню'
+        verbose_name_plural = 'Пункты меню'
+
+    def __str__(self):
+        return f'{self.food_intake.name} на f{self.date}'
