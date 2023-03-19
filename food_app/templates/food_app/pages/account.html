@@ -1,5 +1,6 @@
 {% extends 'food_app/base.html' %}
 {% load static %}
+{% load food_app_filters %}
 
 {% block title %}Личный кабинет{% endblock %}
 
@@ -106,77 +107,50 @@
                                                     <small>Кол-во приёмов пищи: </small><small>ToDo</small>
                                                 </div>
                                             </div>
+                                            <div class="col-12" style="margin-top: 25px;">
+                                                <p class="text-center">
+                                                    {% for step in steps_link %}
+                                                        <a class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green" href="{% url 'food_app:account' %}?step={{ step }}">
+                                                            {{ step|add_days|date:'d.m.Y' }}
+                                                        </a>
+                                                    {% endfor %}
+                                                </p>
+                                            </div>
                                         </div>
+
                                     </div>
                                     <div class="container" style="margin-top: 50px;">
-                                        <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
-                                                </div>
-                                                <div class="col-10">
-                                                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis necessitatibus
-                                                    consectetur rem! Eligendi assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae
-                                                    distinctio cum laboriosam sed. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis
-                                                    necessitatibus consectetur rem! Eligendi
-                                                    assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae distinctio cum laboriosam
-                                                    sed.
-                                                </div>
-                                            </div>
+                                        <div class="container-fluid foodplan__shadow" style="padding: 30px;">
+                                            <h4 class="text-center text-success">Меню на {{ date_compare }}</h4>
                                         </div>
-                                        <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
-                                                </div>
-                                                <div class="col-10">
-                                                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis necessitatibus
-                                                    consectetur rem! Eligendi assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae
-                                                    distinctio cum laboriosam sed. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis
-                                                    necessitatibus consectetur rem! Eligendi
-                                                    assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae distinctio cum laboriosam
-                                                    sed.
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
-                                                </div>
-                                                <div class="col-10">
-                                                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis necessitatibus
-                                                    consectetur rem! Eligendi assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae
-                                                    distinctio cum laboriosam sed. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis
-                                                    necessitatibus consectetur rem! Eligendi
-                                                    assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae distinctio cum laboriosam
-                                                    sed.
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
-                                                </div>
-                                                <div class="col-10">
-                                                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis necessitatibus
-                                                    consectetur rem! Eligendi assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae
-                                                    distinctio cum laboriosam sed. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis
-                                                    necessitatibus consectetur rem! Eligendi
-                                                    assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae distinctio cum laboriosam
-                                                    sed.
-                                                </div>
-                                            </div>
-                                        </div>
+                                        {% for menu in menus %}
+                                            {% for item in menu %}
+                                                {% if item.date == date_compare %}
+                                                    <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
+                                                        <div class="row">
+                                                            <div class="col-2">
+                                                                {% if not item.recipe.image %}
+                                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
+                                                                {% else %}
+                                                                    <img src="{{ item.recipe.image.url }}" alt="" class="w-100">
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="col-10">
+                                                                <h5 class="text-success">{{ item.recipe.title }}</h5>
+                                                                {{ item.recipe.description|safe }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
     </main>
 {% endblock %}

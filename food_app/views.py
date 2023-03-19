@@ -35,11 +35,29 @@ def account(request):
                 request,
                 'food_app/pages/account.html',
                 context={'customer': customer})
-        menus = Menu.objects.filter(
-            subscription=subscription,
-            date__gte=timezone.now(),
-            date__lte=timezone.now() + timedelta(days=7)
-        )
+
+        request_date = timezone.now()
+        menus = []
+        step_counter = 0
+        steps_link = []
+        while request_date < timezone.now() + timedelta(days=7):
+            item = Menu.objects.filter(
+                    subscription=subscription.last(),
+                    date=request_date
+                )
+            if not item.exists():
+                break
+            menus.append(item)
+            steps_link.append(step_counter)
+            request_date += timedelta(days=1)
+            step_counter += 1
+        try:
+            date_compare = timezone.now() + timedelta(
+                days=int(request.GET.get('step', 0))
+            )
+        except ValueError:
+            date_compare = timezone.now()
+
         return render(
             request,
             'food_app/pages/account.html',
@@ -47,6 +65,8 @@ def account(request):
                 'customer': customer,
                 'subscription': subscription.last(),
                 'menus': menus,
+                'date_compare': date_compare.date(),
+                'steps_link': steps_link,
             }
         )
 
