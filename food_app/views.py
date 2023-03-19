@@ -42,9 +42,9 @@ def account(request):
         steps_link = []
         while request_date < timezone.now() + timedelta(days=7):
             item = Menu.objects.filter(
-                    subscription=subscription.last(),
-                    date=request_date
-                )
+                subscription=subscription.last(),
+                date=request_date
+            )
             if not item.exists():
                 break
             menus.append(item)
@@ -105,6 +105,11 @@ def order(request):
         if not order_form.is_valid():
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
+        # promo
+        # get(promo)
+        # if promo -> price - promo
+
+        order_form.save()
         plan = Plan(
             price=order_form.cleaned_data['period'].price,
             period=order_form.cleaned_data['period'],
@@ -219,34 +224,7 @@ def payment_confirmation(request):
     if payment.status == 'succeeded':
         subscription.is_active = True
         subscription.paid = True
-        subscription.save()
-
-        recipes = Recipe.objects \
-            .filter(
-                category=plan.recipe_category,
-                food_intake__in=plan.food_intakes.all(),
-            )
-        # .exclude(allergic_categories__in=plan.allergies.all()
-
-        menu_items = []
-        food_intakes = plan.food_intakes.all()
-
-        for food_intake in food_intakes:
-
-            current_date = subscription.start
-            food_intake_recipes = recipes.filter(food_intake=food_intake).all()
-
-            while current_date <= subscription.end:
-                menu_items.append(
-                    Menu(
-                        date=current_date,
-                        recipe=random.choice(food_intake_recipes),
-                        subscription=subscription
-                    )
-                )
-                current_date += timedelta(days=1)
-
-        Menu.objects.bulk_create(menu_items)
+        subscription.save(update_fields=['is_active', 'pain'])
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
