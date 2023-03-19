@@ -98,13 +98,13 @@
                                                     <small>Персоны: </small><small>{{ subscription.plan.persons }}</small>
                                                 </div>
                                                 <div class="d-flex flex-row justify-content-between">
-                                                    <small>Аллергии: </small><small>{{ subscription.plan.allergies.name }}</small>
+                                                    <small>Аллергии: </small><small>{{ subscription.plan.allergies.name|default:'Нет' }}</small>
                                                 </div>
                                                 <div class="d-flex flex-row justify-content-between">
-                                                    <small>Калории: </small><small>ToDo</small>
+                                                    <small>Калории: </small><small>{{ subscription.plan.recipe_category.recipes.calories }}</small>
                                                 </div>
                                                 <div class="d-flex flex-row justify-content-between">
-                                                    <small>Кол-во приёмов пищи: </small><small>ToDo</small>
+                                                    <small>Кол-во приёмов пищи: </small><small>{{ subscription.plan.food_intakes.count }}</small>
                                                 </div>
                                             </div>
                                             <div class="col-12" style="margin-top: 25px;">
@@ -133,11 +133,26 @@
                                                                     <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
                                                                 {% else %}
                                                                     <img src="{{ item.recipe.image.url }}" alt="" class="w-100">
+                                                                    <h5 class="text-success text-center">{{ item.recipe.food_intake }}</h5>
                                                                 {% endif %}
                                                             </div>
                                                             <div class="col-10">
                                                                 <h5 class="text-success">{{ item.recipe.title }}</h5>
                                                                 {{ item.recipe.description|safe }}
+                                                                <div class="accordion" id="{{ item.pk }}">
+                                                                    <div class="accordion-item">
+                                                                        <h2 class="accordion-header" id="panelsStayOpen-heading-{{ item.pk }}">
+                                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse-{{ item.pk }}" aria-expanded="false" aria-controls="panelsStayOpen-collapse-{{ item.pk }}">
+                                                                                Ингридиенты и способ приготовления:
+                                                                            </button>
+                                                                        </h2>
+                                                                        <div id="panelsStayOpen-collapse-{{ item.pk }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading-{{ item.pk }}"">
+                                                                            <div class="accordion-body">
+                                                                                {{ item.recipe.cooking_method|safe }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
