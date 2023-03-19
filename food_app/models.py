@@ -24,8 +24,10 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = CKEditor5Field('Описание', config_name='extends')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
-    cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
+                              verbose_name='Картинка', blank=True)
+    cooking_method = CKEditor5Field('Способ приготовления',
+                                    config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     price = models.DecimalField(
@@ -35,7 +37,8 @@ class Recipe(models.Model):
         null=True,
         blank=True,
     )
-    calories = models.PositiveSmallIntegerField('Калории', null=True, blank=True)
+    calories = models.PositiveSmallIntegerField('Калории', null=True,
+                                                blank=True)
     category = models.ForeignKey(
         RecipeCategory,
         verbose_name='Меню',
@@ -170,7 +173,7 @@ class FoodIntake(models.Model):
 
 class PlanPeriod(models.Model):
     duration = models.PositiveSmallIntegerField('Срок подписки', default=1)
-    price = price = models.DecimalField(
+    price = models.DecimalField(
         'Стоимость периода',
         max_digits=8,
         decimal_places=2,
@@ -209,7 +212,8 @@ class Plan(models.Model):
         default=PersonChoice.ONE,
     )
     period = models.ForeignKey(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.PROTECT
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
+        on_delete=models.PROTECT
     )
     recipe_category = models.ForeignKey(
         RecipeCategory,
@@ -288,9 +292,11 @@ def get_uploading_path(instance, filename):
 
 class Customer(models.Model):
     user = models.OneToOneField(
-        User, related_name='customer', on_delete=models.CASCADE, verbose_name='Пользователь'
+        User, related_name='customer', on_delete=models.CASCADE,
+        verbose_name='Пользователь'
     )
-    avatar = models.ImageField(upload_to=get_uploading_path, blank=True, verbose_name='Аватар')
+    avatar = models.ImageField(upload_to=get_uploading_path, blank=True,
+                               verbose_name='Аватар')
 
     class Meta:
         verbose_name = 'Пользователь'

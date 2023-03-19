@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from django.utils import timezone
 
 from yookassa import Payment
 
@@ -24,7 +25,30 @@ def index(request):
 def account(request):
     if request.method == 'GET':
         customer = Customer.objects.get(user=request.user)
-        return render(request, 'food_app/pages/account.html', context={'customer': customer})
+        subscription = Subscription.objects.filter(
+            customer=customer,
+            is_active=True,
+            paid=True
+        )
+        if not subscription.exists():
+            return render(
+                request,
+                'food_app/pages/account.html',
+                context={'customer': customer})
+        menus = Menu.objects.filter(
+            subscription=subscription,
+            date__gte=timezone.now(),
+            date__lte=timezone.now() + timedelta(days=7)
+        )
+        return render(
+            request,
+            'food_app/pages/account.html',
+            context={
+                'customer': customer,
+                'subscription': subscription.last(),
+                'menus': menus,
+            }
+        )
 
     elif request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
@@ -175,12 +199,40 @@ def payment_confirmation(request):
     if payment.status == 'succeeded':
         subscription.is_active = True
         subscription.paid = True
-        subscription.save(update_fields=['is_active', 'paid'])
+        subscription.save()
+
+        recipes = Recipe.objects \
+            .filter(
+                category=plan.recipe_category,
+                food_intake__in=plan.food_intakes.all(),
+            )
+        # .exclude(allergic_categories__in=plan.allergies.all()
+
+        menu_items = []
+        food_intakes = plan.food_intakes.all()
+
+        for food_intake in food_intakes:
+
+            current_date = subscription.start
+            food_intake_recipes = recipes.filter(food_intake=food_intake).all()
+
+            while current_date <= subscription.end:
+                menu_items.append(
+                    Menu(
+                        date=current_date,
+                        recipe=random.choice(food_intake_recipes),
+                        subscription=subscription
+                    )
+                )
+                current_date += timedelta(days=1)
+
+        Menu.objects.bulk_create(menu_items)
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
 
     messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
+    plan = subscription.plan
     plan.delete()
     subscription.delete()
     return redirect('food_app:order')
