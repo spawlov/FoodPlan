@@ -4,8 +4,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
-from food_app.querysets import RecipeQuerySet
-
 
 class RecipeCategory(models.Model):
     name = models.CharField('Название', max_length=150)
@@ -25,11 +23,18 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = CKEditor5Field('Описание', config_name='extends')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
-                              verbose_name='Картинка', blank=True)
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
     cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+    price = models.DecimalField(
+        'Стоимость блюда',
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    calories = models.PositiveSmallIntegerField('Калории', null=True, blank=True)
     category = models.ForeignKey(
         RecipeCategory,
         verbose_name='Меню',
@@ -53,14 +58,14 @@ class Recipe(models.Model):
         blank=True,
     )
 
-    objects = RecipeQuerySet.as_manager()
-
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         indexes = [
             models.Index(fields=['title']),
             models.Index(fields=['cooking_time']),
+            models.Index(fields=['calories']),
+            models.Index(fields=['price']),
         ]
 
     def __str__(self):
@@ -106,6 +111,15 @@ class Product(models.Model):
 
 
 class Ingredient(models.Model):
+    class UnitChoice(models.TextChoices):
+        GRAMM = 'gram', 'гр.'
+        ITEM = 'item', 'шт.'
+        SLICE = 'slice', 'дол.'
+        SPOON_SMALL = 'spoon_small', 'ч.л.'
+        SPOON = 'spoon', 'ст.л.'
+        VOLUME = 'volume', 'мл.'
+        PITCH = 'pitch', 'щеп.'
+
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
@@ -118,7 +132,12 @@ class Ingredient(models.Model):
         related_name='ingredients',
         on_delete=models.CASCADE,
     )
-    quantity = models.FloatField('гр.')
+    unit = models.CharField(
+        'Единицы',
+        max_length=20,
+        choices=UnitChoice.choices,
+    )
+    quantity = models.FloatField('Количество')
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
@@ -130,6 +149,11 @@ class Ingredient(models.Model):
 
 class FoodIntake(models.Model):
     name = models.CharField('Прием пищи', max_length=30)
+    price = models.DecimalField(
+        'Стоимость категории',
+        max_digits=8,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = 'Прием пищи'
@@ -144,6 +168,11 @@ class FoodIntake(models.Model):
 
 class PlanPeriod(models.Model):
     duration = models.PositiveSmallIntegerField('Срок подписки', default=1)
+    price = price = models.DecimalField(
+        'Стоимость периода',
+        max_digits=8,
+        decimal_places=2,
+    )
 
     class Meta:
         verbose_name = 'Срок подписки'
@@ -164,7 +193,6 @@ class PlanPeriod(models.Model):
 
 
 class Plan(models.Model):
-
     class PersonChoice(models.IntegerChoices):
         ONE = 1, '1 человек'
         TWO = 2, '2 человека'
@@ -179,8 +207,7 @@ class Plan(models.Model):
         default=PersonChoice.ONE,
     )
     period = models.ForeignKey(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
-        on_delete=models.PROTECT
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.PROTECT
     )
     recipe_category = models.ForeignKey(
         RecipeCategory,
@@ -188,7 +215,7 @@ class Plan(models.Model):
         related_name='plans',
         null=True,
         blank=True,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
     )
     allergies = models.ManyToManyField(
         AllergicCategory,
@@ -217,14 +244,23 @@ class Subscription(models.Model):
     start = models.DateTimeField('Начало подписки', auto_now_add=True)
     end = models.DateTimeField('Окончание подписки')
     is_active = models.BooleanField('Статус', default=False)
+    paid = models.BooleanField('Статус оплаты', default=False)
     plan = models.OneToOneField(
         Plan,
         verbose_name='План',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     customer = models.ForeignKey(
         'Customer',
         verbose_name='Покупатель',
+        on_delete=models.SET_NULL,
+        related_name='subscriptions',
+        null=True,
+        blank=True,
+    )
+    promocode = models.ForeignKey(
+        'Promocode',
+        verbose_name='Промокод',
         on_delete=models.SET_NULL,
         related_name='subscriptions',
         null=True,
@@ -250,16 +286,9 @@ def get_uploading_path(instance, filename):
 
 class Customer(models.Model):
     user = models.OneToOneField(
-        User,
-        related_name='customer',
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        User, related_name='customer', on_delete=models.CASCADE, verbose_name='Пользователь'
     )
-    avatar = models.ImageField(
-        upload_to=get_uploading_path,
-        blank=True,
-        verbose_name='Аватар'
-    )
+    avatar = models.ImageField(upload_to=get_uploading_path, blank=True, verbose_name='Аватар')
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -267,3 +296,22 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class Promocode(models.Model):
+    promocode = models.CharField(max_length=10)
+    start_at = models.DateField("Начало действия промокода")
+    end_at = models.DateField("Конец действия промокода")
+    discount = models.SmallIntegerField("Размер скидки")
+
+    class Meta:
+        verbose_name = 'Промокод'
+        verbose_name_plural = 'Промокоды'
+        indexes = [
+            models.Index(fields=['start_at']),
+            models.Index(fields=['end_at']),
+            models.Index(fields=['discount']),
+        ]
+
+    def __str__(self):
+        return self.promocode

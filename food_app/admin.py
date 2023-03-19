@@ -10,6 +10,7 @@ from .models import (
     Ingredient,
     RecipeCategory,
     Subscription,
+    Promocode,
 )
 
 
@@ -34,24 +35,39 @@ class IngredientInline(admin.TabularInline):
     extra = 1
 
 
+@admin.register(Plan)
+class PlanAdmin(admin.ModelAdmin):
+    readonly_fields = ['price']
+    list_display = (
+        'price',
+        'persons',
+    )
+    list_filter = (
+        'price',
+        'persons',
+    )
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [IngredientInline]
-    list_display = ('title', 'category', 'cooking_time', 'food_intake')
+    list_display = (
+        'title',
+        'category',
+        'cooking_time',
+        'food_intake',
+        'price',
+    )
     list_filter = (
         'category',
         'food_intake',
+        'price',
     )
-    readonly_fields = ('total_calories',)
-    search_fields = ('title', 'description', 'cooking_method')
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.with_calories()
-
-    @admin.display(description='Калории')
-    def total_calories(self, obj):
-        return obj.total_calories
+    search_fields = (
+        'title',
+        'description',
+        'cooking_method'
+    )
 
 
 @admin.register(Product)
@@ -92,3 +108,19 @@ class AllergicCategory(admin.ModelAdmin):
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ['start', 'end', 'is_active']
+
+
+@admin.register(Promocode)
+class PromocodeAdmin(admin.ModelAdmin):
+    list_display = [
+        'promocode',
+        'start_at',
+        'end_at',
+        'discount'
+    ]
+    list_filter = [
+        'promocode',
+        'start_at',
+        'end_at',
+        'discount'
+    ]
