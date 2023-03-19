@@ -1,4 +1,3 @@
-from random import shuffle
 import random
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -14,7 +13,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from food_app.forms import OrderForm, PaymentForm
-from .models import Customer, MenuItem, Plan, Recipe, Subscription
+from .models import Customer, Menu, Plan, Recipe, Subscription
 
 
 def index(request):
@@ -83,6 +82,7 @@ def order(request):
             end=subscription_end,
             plan=plan,
         )
+
         subscription.save()
         customer = Customer.objects.get(user=request.user)
         customer.subscriptions.add(subscription)
@@ -178,11 +178,15 @@ def payment_confirmation(request):
 
     if payment.status == 'succeeded':
         subscription.is_active = True
+        subscription.paid = True
         subscription.save()
 
         recipes = Recipe.objects \
-            .filter(category=plan.recipe_category, food_intake__in=plan.food_intakes.all()) \
-            .exclude(allergic_categories__in=plan.allergies.all())
+            .filter(
+                category=plan.recipe_category,
+                food_intake__in=plan.food_intakes.all(),
+            )
+        # .exclude(allergic_categories__in=plan.allergies.all()
 
         menu_items = []
         food_intakes = plan.food_intakes.all()
@@ -194,15 +198,15 @@ def payment_confirmation(request):
 
             while current_date <= subscription.end:
                 menu_items.append(
-                    MenuItem(
-                        food_intake=food_intake,
+                    Menu(
                         date=current_date,
                         recipe=random.choice(food_intake_recipes),
+                        subscription=subscription
                     )
                 )
                 current_date += timedelta(days=1)
 
-        MenuItem.objects.bulk_create(menu_items)
+        Menu.objects.bulk_create(menu_items)
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')

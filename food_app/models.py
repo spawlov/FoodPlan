@@ -324,18 +324,18 @@ class Promocode(models.Model):
         return self.promocode
 
 
-class MenuItem(models.Model):
+class Menu(models.Model):
     date = models.DateField('Дата')
-    food_intake = models.ForeignKey(
-        FoodIntake,
-        verbose_name='Прием пищи',
-        related_name='menu_items',
-        on_delete=models.CASCADE,
-    )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
         related_name='menu_items',
+        on_delete=models.CASCADE,
+    )
+    subscription = models.ForeignKey(
+        Subscription,
+        verbose_name='Подписка',
+        related_name='menus',
         on_delete=models.CASCADE,
     )
 
@@ -344,4 +344,4 @@ class MenuItem(models.Model):
         verbose_name_plural = 'Пункты меню'
 
     def __str__(self):
-        return f'{self.food_intake.name} на f{self.date}'
+        return f'{self.recipe.title} на f{self.date}'
