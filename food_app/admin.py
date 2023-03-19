@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import (
     AllergicCategory,
     FoodIntake,
+    Menu,
     Plan,
     PlanPeriod,
     Product,
@@ -68,6 +69,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'description',
         'cooking_method'
     )
+    search_fields = ('title', 'description', 'cooking_method')
 
 
 @admin.register(Product)
@@ -124,3 +126,8 @@ class PromocodeAdmin(admin.ModelAdmin):
         'end_at',
         'discount'
     ]
+
+
+@admin.register(Menu)
+class MenuAdmin(admin.ModelAdmin):
+    list_display = ['date', 'recipe']

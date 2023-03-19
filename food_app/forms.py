@@ -9,7 +9,6 @@ class OrderForm(forms.ModelForm):
     error_css_class = 'text-danger fw-semibold'
     promo_code = forms.CharField(required=False, label='Промокод')
 
-
     class Meta:
         model = Plan
         fields = ['persons', 'period', 'allergies', 'food_intakes', 'recipe_category']

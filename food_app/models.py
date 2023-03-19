@@ -2,6 +2,7 @@ import os
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.fields import related
 from django_ckeditor_5.fields import CKEditor5Field
 
 
@@ -23,8 +24,10 @@ class RecipeCategory(models.Model):
 class Recipe(models.Model):
     title = models.CharField('Название', max_length=150)
     description = CKEditor5Field('Описание', config_name='extends')
-    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name='Картинка', blank=True)
-    cooking_method = CKEditor5Field('Способ приготовления', config_name='extends')
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/',
+                              verbose_name='Картинка', blank=True)
+    cooking_method = CKEditor5Field('Способ приготовления',
+                                    config_name='extends')
     created_at = models.DateTimeField('Дата публикации', auto_now_add=True)
     updated_at = models.DateTimeField('Дата обновления', auto_now=True)
     price = models.DecimalField(
@@ -34,13 +37,20 @@ class Recipe(models.Model):
         null=True,
         blank=True,
     )
-    calories = models.PositiveSmallIntegerField('Калории', null=True, blank=True)
+    calories = models.PositiveSmallIntegerField('Калории', null=True,
+                                                blank=True)
     category = models.ForeignKey(
         RecipeCategory,
         verbose_name='Меню',
         related_name='recipes',
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
+    )
+    allergic_categories = models.ManyToManyField(
+        'AllergicCategory',
+        verbose_name='Категории аллергенов',
+        related_name='recipes',
         blank=True,
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -149,11 +159,6 @@ class Ingredient(models.Model):
 
 class FoodIntake(models.Model):
     name = models.CharField('Прием пищи', max_length=30)
-    price = models.DecimalField(
-        'Стоимость категории',
-        max_digits=8,
-        decimal_places=2,
-    )
 
     class Meta:
         verbose_name = 'Прием пищи'
@@ -168,7 +173,7 @@ class FoodIntake(models.Model):
 
 class PlanPeriod(models.Model):
     duration = models.PositiveSmallIntegerField('Срок подписки', default=1)
-    price = price = models.DecimalField(
+    price = models.DecimalField(
         'Стоимость периода',
         max_digits=8,
         decimal_places=2,
@@ -207,7 +212,8 @@ class Plan(models.Model):
         default=PersonChoice.ONE,
     )
     period = models.ForeignKey(
-        PlanPeriod, verbose_name="Срок подписки", related_name='plan', on_delete=models.PROTECT
+        PlanPeriod, verbose_name="Срок подписки", related_name='plan',
+        on_delete=models.PROTECT
     )
     recipe_category = models.ForeignKey(
         RecipeCategory,
@@ -286,9 +292,11 @@ def get_uploading_path(instance, filename):
 
 class Customer(models.Model):
     user = models.OneToOneField(
-        User, related_name='customer', on_delete=models.CASCADE, verbose_name='Пользователь'
+        User, related_name='customer', on_delete=models.CASCADE,
+        verbose_name='Пользователь'
     )
-    avatar = models.ImageField(upload_to=get_uploading_path, blank=True, verbose_name='Аватар')
+    avatar = models.ImageField(upload_to=get_uploading_path, blank=True,
+                               verbose_name='Аватар')
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -315,3 +323,26 @@ class Promocode(models.Model):
 
     def __str__(self):
         return self.promocode
+
+
+class Menu(models.Model):
+    date = models.DateField('Дата')
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт',
+        related_name='menu_items',
+        on_delete=models.CASCADE,
+    )
+    subscription = models.ForeignKey(
+        Subscription,
+        verbose_name='Подписка',
+        related_name='menus',
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = 'Пункт меню'
+        verbose_name_plural = 'Пункты меню'
+
+    def __str__(self):
+        return f'{self.recipe.title} на f{self.date}'

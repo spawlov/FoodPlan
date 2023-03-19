@@ -1,9 +1,11 @@
+import random
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.contrib import messages
+from django.utils import timezone
 
 from yookassa import Payment
 
@@ -12,7 +14,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from food_app.forms import OrderForm, PaymentForm
-from .models import Customer, Plan, Subscription
+from .models import Customer, Menu, Plan, Recipe, Subscription
 
 
 def index(request):
@@ -23,7 +25,30 @@ def index(request):
 def account(request):
     if request.method == 'GET':
         customer = Customer.objects.get(user=request.user)
-        return render(request, 'food_app/pages/account.html', context={'customer': customer})
+        subscription = Subscription.objects.filter(
+            customer=customer,
+            is_active=True,
+            paid=True
+        )
+        if not subscription.exists():
+            return render(
+                request,
+                'food_app/pages/account.html',
+                context={'customer': customer})
+        menus = Menu.objects.filter(
+            subscription=subscription,
+            date__gte=timezone.now(),
+            date__lte=timezone.now() + timedelta(days=7)
+        )
+        return render(
+            request,
+            'food_app/pages/account.html',
+            context={
+                'customer': customer,
+                'subscription': subscription.last(),
+                'menus': menus,
+            }
+        )
 
     elif request.method == 'POST':
         user = User.objects.get(pk=request.user.pk)
@@ -60,17 +85,14 @@ def order(request):
         if not order_form.is_valid():
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
-        price = order_form.cleaned_data['period'].price
-        for food_intake in order_form.cleaned_data['food_intakes']:
-            price += food_intake.price
-
         plan = Plan(
-            price=price,
+            price=order_form.cleaned_data['period'].price,
             period=order_form.cleaned_data['period'],
             recipe_category=order_form.cleaned_data['recipe_category'],
         )
         plan.save()
         plan.allergies.add(*order_form.cleaned_data['allergies'])
+        plan.food_intakes.add(*order_form.cleaned_data['food_intakes'])
         plan.save()
 
         today = datetime.now()
@@ -80,6 +102,7 @@ def order(request):
             end=subscription_end,
             plan=plan,
         )
+
         subscription.save()
         customer = Customer.objects.get(user=request.user)
         customer.subscriptions.add(subscription)
@@ -167,6 +190,7 @@ def payment_confirmation(request):
 
     subscription = Subscription.objects.get(id=subscription_id)
     payment = Payment.find_one(payment_id)
+    plan = subscription.plan
 
     if not subscription or not payment:
         messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
@@ -174,7 +198,36 @@ def payment_confirmation(request):
 
     if payment.status == 'succeeded':
         subscription.is_active = True
+        subscription.paid = True
         subscription.save()
+
+        recipes = Recipe.objects \
+            .filter(
+                category=plan.recipe_category,
+                food_intake__in=plan.food_intakes.all(),
+            )
+        # .exclude(allergic_categories__in=plan.allergies.all()
+
+        menu_items = []
+        food_intakes = plan.food_intakes.all()
+
+        for food_intake in food_intakes:
+
+            current_date = subscription.start
+            food_intake_recipes = recipes.filter(food_intake=food_intake).all()
+
+            while current_date <= subscription.end:
+                menu_items.append(
+                    Menu(
+                        date=current_date,
+                        recipe=random.choice(food_intake_recipes),
+                        subscription=subscription
+                    )
+                )
+                current_date += timedelta(days=1)
+
+        Menu.objects.bulk_create(menu_items)
+
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
 
