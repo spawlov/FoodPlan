@@ -114,11 +114,6 @@ def order(request):
         if not order_form.is_valid():
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
-        # promo
-        # get(promo)
-        # if promo -> price - promo
-
-        order_form.save()
         plan = Plan(
             price=order_form.cleaned_data['period'].price,
             period=order_form.cleaned_data['period'],
@@ -233,7 +228,7 @@ def payment_confirmation(request):
     if payment.status == 'succeeded':
         subscription.is_active = True
         subscription.paid = True
-        subscription.save(update_fields=['is_active', 'pain'])
+        subscription.save(update_fields=['is_active', 'paid'])
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
