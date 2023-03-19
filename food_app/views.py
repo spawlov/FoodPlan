@@ -177,16 +177,13 @@ def payment_confirmation(request):
         subscription.paid = True
         subscription.save()
 
-        recipes = Recipe.objects \
-            .filter(
-                category=plan.recipe_category,
-                food_intake__in=plan.food_intakes.all(),
-            )
-        # .exclude(allergic_categories__in=plan.allergies.all()
+        food_intakes = plan.food_intakes.all()
+        recipes = Recipe.objects.filter(
+            category=plan.recipe_category,
+            food_intake__in=food_intakes,
+        ).exclude(allergic_categories__in=plan.allergies.all())
 
         menu_items = []
-        food_intakes = plan.food_intakes.all()
-
         for food_intake in food_intakes:
 
             current_date = subscription.start
@@ -208,7 +205,6 @@ def payment_confirmation(request):
         return redirect('food_app:account')
 
     messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
-    plan = subscription.plan
     plan.delete()
     subscription.delete()
     return redirect('food_app:order')
