@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from food_app.models import Plan, PlanPeriod, RecipeCategory, Promocode
 from django.forms import widgets
 
+
 class RecipeCategoryRadioSelect(widgets.RadioSelect):
     template_name = 'food_app/partials/recipe_radio_select.html'
 
@@ -17,7 +18,11 @@ class RecipeCategoryRadioSelect(widgets.RadioSelect):
 
 
 class OrderForm(forms.ModelForm):
-    promo_code = forms.CharField(required=False, label='Промокод')
+    promo_code = forms.CharField(
+        required=False,
+        label='Промокод',
+        widget=forms.TextInput(attrs={'class': 'form-control me-2'}),
+    )
 
     class Meta:
         model = Plan
@@ -48,6 +53,8 @@ class OrderForm(forms.ModelForm):
         self.fields['food_intakes'].empty_label = None
 
         self.fields['allergies'].required = False
+
+        self.fields['promo_code'].label_attrs = {'class': 'form-label me-2-label me-2'}
 
     def clean(self):
         cleaned_data = super().clean()
