@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from food_app.forms import OrderForm, PaymentForm
-from .models import Customer, Menu, Plan, Recipe, Subscription
+from .models import Customer, Menu, Plan, Promocode, Recipe, Subscription
 
 
 def index(request):
@@ -27,16 +27,9 @@ def index(request):
 def account(request):
     if request.method == 'GET':
         customer = Customer.objects.get(user=request.user)
-        subscription = Subscription.objects.filter(
-            customer=customer,
-            is_active=True,
-            paid=True
-        )
+        subscription = Subscription.objects.filter(customer=customer, is_active=True, paid=True)
         if not subscription.exists():
-            return render(
-                request,
-                'food_app/pages/account.html',
-                context={'customer': customer})
+            return render(request, 'food_app/pages/account.html', context={'customer': customer})
 
         request_date = timezone.now()
         menus = []
@@ -45,23 +38,18 @@ def account(request):
         calories_list = []
         while request_date < timezone.now() + timedelta(days=7):
             item = Menu.objects.filter(
-                subscription=subscription.last(),
-                date=request_date
+                subscription=subscription.last(), date=request_date
             ).prefetch_related('recipe__ingredients')
 
             if not item.exists():
                 break
-            calories_list.append(
-                item.aggregate(calories=Sum('recipe_id__calories'))
-            )
+            calories_list.append(item.aggregate(calories=Sum('recipe_id__calories')))
             menus.append(item)
             steps_link.append(step_counter)
             request_date += timedelta(days=1)
             step_counter += 1
         try:
-            date_compare = timezone.now() + timedelta(
-                days=int(request.GET.get('step', 0))
-            )
+            date_compare = timezone.now() + timedelta(days=int(request.GET.get('step', 0)))
         except ValueError:
             date_compare = timezone.now()
         calories = calories_list[int(request.GET.get("step", 0))]['calories']
@@ -76,7 +64,7 @@ def account(request):
                 'date_compare': date_compare.date(),
                 'steps_link': steps_link,
                 'calories': calories,
-            }
+            },
         )
 
     elif request.method == 'POST':
@@ -114,13 +102,13 @@ def order(request):
         if not order_form.is_valid():
             return render(request, 'food_app/pages/order.html', {'order_form': order_form})
 
-        # promo
-        # get(promo)
-        # if promo -> price - promo
+        price = order_form.cleaned_data['period'].price
+        promocode = order_form.cleaned_data['promo_code']
+        if promocode:
+            price = price - price * promocode.discount / 100
 
-        order_form.save()
         plan = Plan(
-            price=order_form.cleaned_data['period'].price,
+            price=price,
             period=order_form.cleaned_data['period'],
             recipe_category=order_form.cleaned_data['recipe_category'],
         )
@@ -135,6 +123,7 @@ def order(request):
         subscription = Subscription(
             end=subscription_end,
             plan=plan,
+            promocode=promocode if promocode else None,
         )
 
         subscription.save()
@@ -152,6 +141,10 @@ def checkout(request):
     subscription = (
         Subscription.objects.filter(customer__user_id=request.user).order_by('-start').first()
     )
+    price = subscription.plan.price
+    discounted_price = (
+        price - price * subscription.promocode.discount / 100 if subscription.promocode else None
+    )
 
     if request.method == 'POST':
         payment_form = PaymentForm(request.POST)
@@ -163,14 +156,18 @@ def checkout(request):
                 'food_app/pages/checkout.html',
                 {
                     'payment_form': payment_form,
-                    'price': subscription.plan.price,
+                    'price': price,
+                    'discounted_price': discounted_price,
                 },
             )
 
         idempotence_key = str(uuid.uuid4())
         payment = Payment.create(
             {
-                'amount': {'value': subscription.plan.price, 'currency': 'RUB'},
+                'amount': {
+                    'value': discounted_price if discounted_price else price,
+                    'currency': 'RUB',
+                },
                 'payment_method_data': {
                     'type': 'bank_card',
                     'card': {
@@ -199,13 +196,19 @@ def checkout(request):
         request.session['subscription_id'] = subscription.id
         return redirect(confirmation_url)
 
+    price = subscription.plan.price
+    discounted_price = (
+        price - price * subscription.promocode.discount / 100 if subscription.promocode else None
+    )
     payment_form = PaymentForm()
+
     return render(
         request,
         'food_app/pages/checkout.html',
         {
             'payment_form': payment_form,
-            'price': subscription.plan.price,
+            'price': price,
+            'discounted_price': discounted_price,
         },
     )
 
@@ -233,7 +236,7 @@ def payment_confirmation(request):
     if payment.status == 'succeeded':
         subscription.is_active = True
         subscription.paid = True
-        subscription.save(update_fields=['is_active', 'pain'])
+        subscription.save(update_fields=['is_active', 'paid'])
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')

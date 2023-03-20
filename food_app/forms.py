@@ -3,17 +3,34 @@ from datetime import date
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from food_app.models import Plan, PlanPeriod, RecipeCategory, Promocode
+from django.forms import widgets
+
+
+class RecipeCategoryRadioSelect(widgets.RadioSelect):
+    template_name = 'food_app/partials/recipe_radio_select.html'
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        if value:
+            option['attrs']['image'] = value.instance.image.url
+            option['attrs']['name'] = value.instance.name
+        return option
 
 
 class OrderForm(forms.ModelForm):
-    error_css_class = 'text-danger fw-semibold'
-    promo_code = forms.CharField(required=False, label='Промокод')
+    promo_code = forms.CharField(
+        required=False,
+        label='Промокод',
+        widget=forms.TextInput(attrs={'class': 'form-control me-2'}),
+    )
 
     class Meta:
         model = Plan
-        fields = ['persons', 'period', 'allergies', 'food_intakes', 'recipe_category']
+        fields = ['persons', 'period', 'allergies', 'food_intakes', 'recipe_category', 'promo_code']
         widgets = {
-            'recipe_category': forms.Select(attrs={'class': 'form-select'}, ),
+            'recipe_category': RecipeCategoryRadioSelect(
+                attrs={'class': 'foodplan_selected d-none'}
+            ),
             'food_intakes': forms.CheckboxSelectMultiple(
                 attrs={'class': 'form-check-input me-1 foodplan_checked-green'},
             ),
@@ -27,10 +44,8 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
 
-        recipe_categories = RecipeCategory.objects.order_by('name')
         periods = PlanPeriod.objects.order_by('duration')
 
-        self.fields['recipe_category'].initial = recipe_categories.first()
         self.fields['period'].initial = periods.first()
 
         self.fields['recipe_category'].empty_label = None
@@ -39,14 +54,16 @@ class OrderForm(forms.ModelForm):
 
         self.fields['allergies'].required = False
 
+        self.fields['promo_code'].label_attrs = {'class': 'form-label me-2-label me-2'}
+
     def clean(self):
         cleaned_data = super().clean()
         promo_code = cleaned_data.get('promocode')
         if promo_code:
             try:
-                promocode = Promocode.objects.get(promocode=promo_code,
-                                                  start_at__lte=date.today(),
-                                                  end_at__gte=date.today())
+                promocode = Promocode.objects.get(
+                    promocode=promo_code, start_at__lte=date.today(), end_at__gte=date.today()
+                )
                 cleaned_data['discount'] = promocode.discount
             except ObjectDoesNotExist:
                 self.add_error('promo_code', 'Недействительный промокод')
