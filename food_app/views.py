@@ -43,18 +43,14 @@ def account(request):
 
             if not item.exists():
                 break
-            calories_list.append(
-                item.aggregate(calories=Sum('recipe_id__calories'))
-            )
+            calories_list.append(item.aggregate(calories=Sum('recipe_id__calories')))
             prices_list.append(item.aggregate(prices=Sum('recipe_id__price')))
             menus.append(item)
             steps_link.append(step_counter)
             request_date += timedelta(days=1)
             step_counter += 1
         try:
-            date_compare = timezone.now() + timedelta(
-                days=int(request.GET.get('step', 0))
-            )
+            date_compare = timezone.now() + timedelta(days=int(request.GET.get('step', 0)))
         except ValueError:
             date_compare = timezone.now()
         calories = calories_list[int(request.GET.get("step", 0))]['calories']
@@ -151,7 +147,9 @@ def checkout(request):
 
     price = subscription.plan.price
     price_without_discount = (
-        float(price) / (1 - subscription.promocode.discount / 100) if subscription.promocode else None
+        float(price) / (1 - subscription.promocode.discount / 100)
+        if subscription.promocode
+        else None
     )
 
     if request.method == 'POST':
@@ -207,7 +205,9 @@ def checkout(request):
 
     price = subscription.plan.price
     price_without_discount = (
-        float(price) / (1 - subscription.promocode.discount / 100) if subscription.promocode else None
+        float(price) / (1 - subscription.promocode.discount / 100)
+        if subscription.promocode
+        else None
     )
     payment_form = PaymentForm()
 
@@ -257,3 +257,24 @@ def payment_confirmation(request):
     return redirect('food_app:order')
 
 
+def get_plan_price(request):
+
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return HttpResponseBadRequest('Invalid request')
+
+    if request.method == 'GET':
+        period = PlanPeriod.objects.filter(id=request.GET.get('period')).first()
+        price = period.price
+        promo = request.GET.get('promo_code', None)
+
+        if promo:
+            promo = Promocode.objects.filter(promocode=promo.upper()).first()
+            if promo:
+                price = price - price * promo.discount / 100
+                price_without_discount = period.price
+            else:
+                price_without_discount = None
+        else:
+            price_without_discount = None
+        return JsonResponse({'price': price, 'price_without_discount': price_without_discount})
+    return JsonResponse({'status': 'Invalid request'}, status=400)
