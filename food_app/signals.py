@@ -36,6 +36,10 @@ def create_menu_items(sender, instance, created, update_fields, **kwargs):
             current_date = instance.start
             food_intake_recipes = recipes.filter(food_intake=food_intake).all()
 
+            # TODO: remove it
+            if not food_intake_recipes:
+                continue
+
             while current_date <= instance.end:
                 menu_items.append(
                     Menu(
@@ -46,4 +50,6 @@ def create_menu_items(sender, instance, created, update_fields, **kwargs):
                 )
                 current_date += timedelta(days=1)
 
-        Menu.objects.bulk_create(menu_items)
+        # TODO: remove it
+        if menu_items:
+            Menu.objects.bulk_create(menu_items)
