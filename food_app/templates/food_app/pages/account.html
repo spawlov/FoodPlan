@@ -82,6 +82,11 @@
                                                     <h3>У Вас активна подписка на период с {{ subscription.start|date:'d.m.Y' }} по {{ subscription.end|date:'d.m.Y' }}</h3>
                                                 {% else %}
                                                     <h3>У Вас нет активных подписок</h3>
+                                                    <div style="text-align: center;">
+                                                        <a class="btn btn-success mt-3" href="{% url 'food_app:order' %}"
+                                                           style="font-size: 1.5em; text-decoration: none; font-weight: 500;">Оформите
+                                                            подписку</a>
+                                                    </div>
                                                 {% endif %}
                                             </div>
                                             {% if subscription %}
@@ -93,16 +98,16 @@
                                                     <h6>
                                                         Дополнительно, ниже, расположены кнопки с меню на неделю вперед.<br>С их помощью можно посмотреть меню на следующие дни.
                                                     </h6>
-                                                <h6>
-                                                    Меню насчитано на {{ subscription.plan.food_intakes.count }} приёма(ов) пищи в день.
-                                                </h6>
-                                                <h6>
-                                                    Калорийность сегодняшнего меню из {{ subscription.plan.food_intakes.count }} блюд составит {{ calories }}ккал, а стоимость {{ prices }}&#8381;.
-                                                </h6>
-                                                <h6>
-                                                    Расчёт произведен на {{ subscription.plan.persons }} персону(ы).
-                                                </h6>
-                                                <h5 class="text-success">Спасибо, что Вы с нами!</h5>
+                                                    <h6>
+                                                        Меню насчитано на {{ subscription.plan.food_intakes.count }} приёма(ов) пищи в день.
+                                                    </h6>
+                                                    <h6>
+                                                        Калорийность сегодняшнего меню из {{ subscription.plan.food_intakes.count }} блюд составит {{ calories }}ккал, а стоимость {{ prices }}&#8381;.
+                                                    </h6>
+                                                    <h6>
+                                                        Расчёт произведен на {{ subscription.plan.persons }} персону(ы).
+                                                    </h6>
+                                                    <h5 class="text-success">Спасибо, что Вы с нами!</h5>
                                                 </div>
                                                 <div class="col-md-12 col-lg-3 text-muted d-flex flex-column justify-content-between">
                                                     <div class="d-flex flex-row justify-content-between">
@@ -128,59 +133,60 @@
                                                     </p>
                                                 </div>
                                             {% endif %}
-                                        </div>
-
-                                    </div>
-                                    <div class="container" style="margin-top: 50px;">
-                                        {% if subscription %}
-                                            <div class="container-fluid foodplan__shadow" style="padding: 30px;">
-                                                <h4 class="text-center text-success">Меню на {{ date_compare }}</h4>
                                             </div>
-                                        {% endif %}
-                                        {% for menu in menus %}
-                                            {% for item in menu %}
-                                                {% if item.date == date_compare %}
-                                                    <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
-                                                        <div class="row">
-                                                            <div class="col-2">
-                                                                {% if not item.recipe.image %}
-                                                                    <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
-                                                                {% else %}
-                                                                    <img src="{{ item.recipe.image.url }}" alt="" class="w-100">
-                                                                    <h5 class="text-success text-center">{{ item.recipe.food_intake }}</h5>
-                                                                {% endif %}
-                                                            </div>
-                                                            <div class="col-10">
-                                                                <h5 class="text-success">{{ item.recipe.title }}</h5>
-                                                                {{ item.recipe.description|safe }}
-                                                                <div class="accordion" id="{{ item.pk }}">
-                                                                    <div class="accordion-item">
-                                                                        <h2 class="accordion-header" id="panelsStayOpen-heading-{{ item.pk }}">
-                                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse-{{ item.pk }}" aria-expanded="false" aria-controls="panelsStayOpen-collapse-{{ item.pk }}">
-                                                                                Ингридиенты и способ приготовления:
-                                                                            </button>
-                                                                        </h2>
-                                                                        <div id="panelsStayOpen-collapse-{{ item.pk }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading-{{ item.pk }}">
-                                                                            <div class="accordion-body">
-                                                                                <p>Калорийность блюда: {{ item.recipe.calories }}ккал.</p>
-                                                                                <p>Стоимость блюда: {{ item.recipe.price }}&#8381;</p>
-                                                                                Ингредиенты:
-                                                                                <ul>
-                                                                                    {% for recipe_item in item.recipe.ingredients.get_queryset %}
-                                                                                        <li>{{ recipe_item.product.name }}: {{ recipe_item.quantity }}{{ recipe_item.get_unit_display }}</li>
-                                                                                    {% endfor %}
-                                                                                </ul>
-                                                                                {{ item.recipe.cooking_method|safe }}
+
+                                        </div>
+                                        <div class="container" style="margin-top: 50px;">
+                                            {% if subscription %}
+                                                <div class="container-fluid foodplan__shadow" style="padding: 30px;">
+                                                    <h4 class="text-center text-success">Меню на {{ date_compare }}</h4>
+                                                </div>
+                                            {% endif %}
+                                            {% for menu in menus %}
+                                                {% for item in menu %}
+                                                    {% if item.date == date_compare %}
+                                                        <div class="container-fluid foodplan__shadow" style="padding: 25px 25px">
+                                                            <div class="row">
+                                                                <div class="col-2">
+                                                                    {% if not item.recipe.image %}
+                                                                        <img src="{% static 'food_app/img/circle1.png' %}" alt="" class="w-100">
+                                                                    {% else %}
+                                                                        <img src="{{ item.recipe.image.url }}" alt="" class="w-100">
+                                                                        <h5 class="text-success text-center">{{ item.recipe.food_intake }}</h5>
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-10">
+                                                                    <h5 class="text-success">{{ item.recipe.title }}</h5>
+                                                                    {{ item.recipe.description|safe }}
+                                                                    <div class="accordion" id="{{ item.pk }}">
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="panelsStayOpen-heading-{{ item.pk }}">
+                                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse-{{ item.pk }}" aria-expanded="false" aria-controls="panelsStayOpen-collapse-{{ item.pk }}">
+                                                                                    Ингридиенты и способ приготовления:
+                                                                                </button>
+                                                                            </h2>
+                                                                            <div id="panelsStayOpen-collapse-{{ item.pk }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-heading-{{ item.pk }}">
+                                                                                <div class="accordion-body">
+                                                                                    <p>Калорийность блюда: {{ item.recipe.calories }}ккал.</p>
+                                                                                    <p>Стоимость блюда: {{ item.recipe.price }}&#8381;</p>
+                                                                                    Ингредиенты:
+                                                                                    <ul>
+                                                                                        {% for recipe_item in item.recipe.ingredients.get_queryset %}
+                                                                                            <li>{{ recipe_item.product.name }}: {{ recipe_item.quantity }}{{ recipe_item.get_unit_display }}</li>
+                                                                                        {% endfor %}
+                                                                                    </ul>
+                                                                                    {{ item.recipe.cooking_method|safe }}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
                                             {% endfor %}
-                                        {% endfor %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

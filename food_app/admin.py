@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from .models import (
     AllergicCategory,
@@ -58,6 +59,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'cooking_time',
         'food_intake',
         'price',
+        'get_photo'
     )
     list_filter = (
         'category',
@@ -69,6 +71,16 @@ class RecipeAdmin(admin.ModelAdmin):
         'description',
         'cooking_method'
     )
+    readonly_fields = (
+        'get_photo',
+    )
+
+    def get_photo(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="100">')
+        return 'No image attached'
+
+    get_photo.short_description = "Картинка"
 
 
 @admin.register(Product)
