@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import widgets
 
-from food_app.models import Plan, PlanPeriod, Promocode
+from food_app.models import Plan, PlanPeriod, Promocode, RecipeCategory
 
 
 class RecipeCategoryRadioSelect(widgets.RadioSelect):
@@ -20,7 +20,7 @@ class OrderForm(forms.ModelForm):
     promo_code = forms.CharField(
         required=False,
         label='Промокод',
-        widget=forms.TextInput(attrs={'class': 'form-control me-2'}),
+        widget=forms.TextInput(attrs={'class': 'form-control me-2', 'placeholder': 'Промокод'}),
     )
 
     class Meta:

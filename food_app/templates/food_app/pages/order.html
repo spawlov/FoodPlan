@@ -1,13 +1,7 @@
-{% extends 'food_app/base.html' %}
-{% load static %}
-{% block title %}Личный кабинет{% endblock %}
-
-{% block scripts %}
-  <script src="{% static 'food_app/js/calc_price.js' %}"></script>
-{% endblock %}
-
-
-{% block content %}
+{% extends 'food_app/base.html' %} {% load static %} {% block title %}Личный
+кабинет{% endblock %} {% block scripts %}
+<script src="{% static 'food_app/js/calc_price.js' %}"></script>
+{% endblock %} {% block content %}
 <main style="margin-top: calc(2rem + 85px)">
   <section>
     <div class="container">
@@ -15,9 +9,7 @@
         {% csrf_token %}
 
         <h1><strong class="foodplan_green">1 шаг </strong>до первого меню</h1>
-        <h5 class="foodplan_green mb-3">
-          Вам будет доступно 4 типа меню:
-        </h5>
+        <h5 class="foodplan_green mb-3">Вам будет доступно 4 типа меню:</h5>
 
         {{ order_form.recipe_category }}
 
@@ -25,69 +17,74 @@
         <table class="table text-center text-truncate mb-5">
           <div>
             {% if order_form.errors %}
-              <ul class="alert alert-danger" role="alert">
-                  {% for field in order_form %}
-                      {% for error in field.errors %}
-                          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                      {% endfor %}
-                  {% endfor %}
-              </ul>
+            <ul class="alert alert-danger" role="alert">
+              {% for field in order_form %} {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+              {% endfor %} {% endfor %}
+            </ul>
             {% endif %}
           </div>
           <tbody>
             <tr>
               <th scope="row" class="text-start">Срок</th>
-              <td>
-                 {{ order_form.period }}
-              </td>
+              <td>{{ order_form.period }}</td>
             </tr>
             <tr>
               <th scope="row" class="text-start">Кол-во персон</th>
-              <td>
-                {{ order_form.persons }}
-              </td>
+              <td>{{ order_form.persons }}</td>
             </tr>
             <tr>
-                <th scope="row" class="text-start">Приемы пищи</th>
-                <td>
-                    {% for field in order_form.food_intakes %}
-                        <div class="form-check d-flex justify-content-start">
-                            {{field}}
-                        </div>
-                    {% endfor %}
-                </td>
+              <th scope="row" class="text-start">Приемы пищи</th>
+              <td>
+                {% for field in order_form.food_intakes %}
+                <div class="form-check d-flex justify-content-start">
+                  {{field}}
+                </div>
+                {% endfor %}
+              </td>
             </tr>
             <tr>
               <th scope="row" class="text-start">Аллергии</th>
               <td>
                 {% for field in order_form.allergies %}
-                    <div class="form-check d-flex justify-content-start">
-                        {{field}}
-                    </div>
+                <div class="form-check d-flex justify-content-start">
+                  {{field}}
+                </div>
                 {% endfor %}
               </td>
             </tr>
           </tbody>
         </table>
-        <div class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey">
-          {{ order_form.promo_code.label_tag }}
+        <div
+          class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey"
+        >
+          <div class='col-8'>
+          {% comment %} {{ order_form.promo_code.label_tag }} {{ order_form.promo_code }} {% endcomment %}
           {{ order_form.promo_code }}
-        <button
-          class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green"
-        >
-          Применить
-        </button>
+          </div>
+          <div class='col-2 text-center'>
+          <button
+            id="apply_promo"
+            class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green text-center"
+          >
+            Применить
+          </button>
         </div>
-      <div class="d-flex justify-content-center my-5">
-        <button
-          form="order"
-          type="submit"
-          class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green w-50"
-        >
-          Оплатить
-        </button>
-      </div>
-    </form>
+          <div id="promo_alert" class="col-2">
+            <div class="text-success" id="promo_success" style="display: none;">Применен</div>
+            <div class="text-danger" id="promo_fail" style="display: none;">Недействителен</div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center my-5">
+          <button
+            form="order"
+            type="submit"
+            class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green w-50"
+          >
+            Оплатить
+          </button>
+        </div>
+      </form>
     </div>
   </section>
 </main>
