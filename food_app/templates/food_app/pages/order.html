@@ -1,5 +1,13 @@
-{% extends 'food_app/base.html' %} {% load static %} {% block title %}Личный
-кабинет{% endblock %} {% block content %}
+{% extends 'food_app/base.html' %}
+{% load static %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'food_app/js/calc_price.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
 <main style="margin-top: calc(2rem + 85px)">
   <section>
     <div class="container">
