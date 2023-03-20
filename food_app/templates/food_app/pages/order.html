@@ -17,11 +17,11 @@
         <table class="table text-center text-truncate mb-5">
           <div>
             {% if order_form.errors %}
-            <ul class="alert alert-danger" role="alert">
-              {% for field in order_form %} {% for error in field.errors %}
-              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-              {% endfor %} {% endfor %}
-            </ul>
+              <ul class="alert alert-danger" role="alert">
+                {% for field in order_form %} {% for error in field.errors %}
+                <li style="list-style-type: none;"><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %} {% endfor %}
+              </ul>
             {% endif %}
           </div>
           <tbody>
@@ -59,7 +59,6 @@
           class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey"
         >
           <div class='col-8'>
-          {% comment %} {{ order_form.promo_code.label_tag }} {{ order_form.promo_code }} {% endcomment %}
           {{ order_form.promo_code }}
           </div>
           <div class='col-2 text-center'>

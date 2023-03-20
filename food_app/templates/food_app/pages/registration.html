@@ -16,8 +16,15 @@
           </div>
           <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
               <form method="post" action="{% url 'account_signup' %}">
-                  {{ form.non_field_errors }}
-                  {{ form.errors }}
+                {% if form.errors %}
+                  <ul class="alert alert-danger" role="alert">
+                    {% for field, errors in form.errors.items %}
+                      {% for error in errors %}
+                        <li class="p-2" style="list-style-type: none;"><strong>{{ field.label }}</strong> {{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
                   {% csrf_token %}
                   <h1 class="mb-4 text-center"><strong>Регистрация</strong></h1>
                   <div class="mb-3">
