@@ -86,13 +86,23 @@
                                             </div>
                                             {% if subscription %}
                                                 <div class="col-md-12 col-lg-9">
-                                                    <h6>Описание подписки Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis necessitatibus
-                                                        consectetur rem! Eligendi assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae
-                                                        distinctio cum laboriosam sed. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eius saepe ea nobis
-                                                        necessitatibus consectetur rem! Eligendi
-                                                        assumenda facere sint quibusdam dolorem quasi doloribus nemo, temporibus molestiae distinctio cum laboriosam
-                                                        sed.
+                                                    <h5>Описание меню на {{ date_compare }}</h5>
+                                                    <h6>
+                                                        Согласно Вашей подписке было составлено индивидуальное меню.<br>Блюда на сегодняшний день Вы можете посмотреть уже сейчас.
                                                     </h6>
+                                                    <h6>
+                                                        Дополнительно, ниже, расположены кнопки с меню на неделю вперед.<br>С их помощью можно посмотреть меню на следующие дни.
+                                                    </h6>
+                                                <h6>
+                                                    Меню насчитано на {{ subscription.plan.food_intakes.count }} приёма(ов) пищи в день.
+                                                </h6>
+                                                <h6>
+                                                    Калорийность сегодняшнего меню из {{ subscription.plan.food_intakes.count }} блюд составит {{ calories }}ккал, а стоимость {{ prices }}&#8381;.
+                                                </h6>
+                                                <h6>
+                                                    Расчёт произведен на {{ subscription.plan.persons }} персону(ы).
+                                                </h6>
+                                                <h5 class="text-success">Спасибо, что Вы с нами!</h5>
                                                 </div>
                                                 <div class="col-md-12 col-lg-3 text-muted d-flex flex-column justify-content-between">
                                                     <div class="d-flex flex-row justify-content-between">
