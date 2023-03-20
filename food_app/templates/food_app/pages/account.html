@@ -81,7 +81,12 @@
                                                 {% if subscription %}
                                                     <h3>У Вас активна подписка на период с {{ subscription.start|date:'d.m.Y' }} по {{ subscription.end|date:'d.m.Y' }}</h3>
                                                 {% else %}
-                                                    <h3>У Вас нет активных подписок</h3>
+                                                  <h3>У Вас нет активных подписок</h3>
+                                                  <div style="text-align: center;">
+                                                    <a class="btn btn-success mt-3" href="{% url 'food_app:order' %}"
+                                                       style="font-size: 1.5em; text-decoration: none; font-weight: 500;">Оформите
+                                                      подписку</a>
+                                                  </div>
                                                 {% endif %}
                                             </div>
                                             {% if subscription %}
