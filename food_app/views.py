@@ -36,6 +36,7 @@ def account(request):
         step_counter = 0
         steps_link = []
         calories_list = []
+        prices_list = []
         while request_date < timezone.now() + timedelta(days=7):
             item = Menu.objects.filter(
                 subscription=subscription.last(), date=request_date
@@ -43,17 +44,23 @@ def account(request):
 
             if not item.exists():
                 break
-            calories_list.append(item.aggregate(calories=Sum('recipe_id__calories')))
+            calories_list.append(
+                item.aggregate(calories=Sum('recipe_id__calories'))
+            )
+            prices_list.append(item.aggregate(prices=Sum('recipe_id__price')))
             menus.append(item)
             steps_link.append(step_counter)
             request_date += timedelta(days=1)
             step_counter += 1
         try:
-            date_compare = timezone.now() + timedelta(days=int(request.GET.get('step', 0)))
+            date_compare = timezone.now() + timedelta(
+                days=int(request.GET.get('step', 0))
+            )
         except ValueError:
             date_compare = timezone.now()
         calories = calories_list[int(request.GET.get("step", 0))]['calories']
-        print()
+        prices = prices_list[int(request.GET.get("step", 0))]['prices']
+        print(prices)
         return render(
             request,
             'food_app/pages/account.html',
@@ -64,6 +71,7 @@ def account(request):
                 'date_compare': date_compare.date(),
                 'steps_link': steps_link,
                 'calories': calories,
+                'prices': prices,
             },
         )
 
