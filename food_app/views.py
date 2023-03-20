@@ -170,6 +170,7 @@ def checkout(request):
             )
 
         idempotence_key = str(uuid.uuid4())
+        month = str(payment_form.cleaned_data["card_month"])
         payment = Payment.create(
             {
                 'amount': {
@@ -181,7 +182,7 @@ def checkout(request):
                     'card': {
                         'number': payment_form.cleaned_data['card_number'],
                         'expiry_year': f'20{payment_form.cleaned_data["card_year"]}',
-                        'expiry_month': payment_form.cleaned_data['card_month'],
+                        'expiry_month': f'0{month}' if len(month) == 1 else month,
                         'csc': payment_form.cleaned_data["card_cvc"],
                         'cardholder': payment_form.cleaned_data['card_name'],
                     },

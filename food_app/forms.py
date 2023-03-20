@@ -1,9 +1,8 @@
-from datetime import date
-
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
-from food_app.models import Plan, PlanPeriod, RecipeCategory, Promocode
 from django.forms import widgets
+
+from food_app.models import Plan, PlanPeriod, Promocode
 
 
 class RecipeCategoryRadioSelect(widgets.RadioSelect):
@@ -58,17 +57,14 @@ class OrderForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        promo_code = cleaned_data.get('promocode')
+
+        promo_code = cleaned_data.get('promo_code')
         if promo_code:
             try:
-                promocode = Promocode.objects.get(
-                    promocode=promo_code, start_at__lte=date.today(), end_at__gte=date.today()
-                )
-                cleaned_data['discount'] = promocode.discount
+                promocode = Promocode.objects.get(promocode=promo_code.upper())
+                cleaned_data['promo_code'] = promocode
             except ObjectDoesNotExist:
-                self.add_error('promo_code', 'Недействительный промокод')
-        else:
-            cleaned_data['discount'] = 0
+                cleaned_data['promo_code'] = None
         return cleaned_data
 
 
