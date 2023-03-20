@@ -61,7 +61,13 @@
                     Введите 3-значный CVC, используя только цифры.
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Оплатить {{price}} р.</button>
+                <button type="submit" class="btn btn-primary mt-3">
+                  {% if discounted_price %}
+                    Оплатить: <span class="text-decoration-line-through  text-danger">{{price}}</span> <span class="fw-bold">{{discounted_price}}р.</span>
+                  {% else %}
+                    Оплатить: {{price}} р.
+                  {% endif %}
+                </button>
               </form>
             </div>
           </div>

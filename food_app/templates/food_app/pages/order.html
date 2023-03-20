@@ -61,23 +61,15 @@
             </tr>
           </tbody>
         </table>
-        <button type="submit" id="TableSubmit" class="d-none"></button>
-      </form>
-
-      <form
-        class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey"
-      >
-        <label for="exampleInputPassword1" class="form-label me-2"
-          >Промокод</label
-        >
-        <input type="password" class="form-control me-2" id="password" />
+        <div class="card d-flex flex-row align-items-baseline mb-5 p-3 foodplan__bg_grey">
+          {{ order_form.promo_code.label_tag }}
+          {{ order_form.promo_code }}
         <button
-          type="submit"
           class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green"
         >
           Применить
         </button>
-      </form>
+        </div>
       <div class="d-flex justify-content-center my-5">
         <button
           form="order"
