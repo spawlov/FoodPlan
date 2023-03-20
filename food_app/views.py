@@ -55,7 +55,6 @@ def account(request):
             date_compare = timezone.now()
         calories = calories_list[int(request.GET.get("step", 0))]['calories']
         prices = prices_list[int(request.GET.get("step", 0))]['prices']
-        print(prices)
         return render(
             request,
             'food_app/pages/account.html',

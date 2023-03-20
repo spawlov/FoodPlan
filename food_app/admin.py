@@ -137,8 +137,3 @@ class PromocodeAdmin(admin.ModelAdmin):
         'end_at',
         'discount'
     ]
-
-
-@admin.register(Menu)
-class MenuAdmin(admin.ModelAdmin):
-    list_display = ['date', 'recipe']
