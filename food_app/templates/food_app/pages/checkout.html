@@ -62,8 +62,8 @@
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary mt-3">
-                  {% if discounted_price %}
-                    Оплатить: <span class="text-decoration-line-through  text-danger">{{price}}</span> <span class="fw-bold">{{discounted_price}}р.</span>
+                  {% if price_without_discount %}
+                    Оплатить: <span class="text-decoration-line-through  text-danger">{{price_without_discount}}</span> <span class="fw-bold">{{price}}р.</span>
                   {% else %}
                     Оплатить: {{price}} р.
                   {% endif %}

@@ -1,13 +1,12 @@
-import random
-
 from django.db.models import Count, Sum, F
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from yookassa import Payment
 
@@ -16,7 +15,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from food_app.forms import OrderForm, PaymentForm
-from .models import Customer, Menu, Plan, Promocode, Recipe, Subscription
+from .models import Customer, Menu, Plan, PlanPeriod, Promocode, Recipe, Subscription
 
 
 def index(request):
@@ -149,9 +148,10 @@ def checkout(request):
     subscription = (
         Subscription.objects.filter(customer__user_id=request.user).order_by('-start').first()
     )
+
     price = subscription.plan.price
-    discounted_price = (
-        price - price * subscription.promocode.discount / 100 if subscription.promocode else None
+    price_without_discount = (
+        float(price) / (1 - subscription.promocode.discount / 100) if subscription.promocode else None
     )
 
     if request.method == 'POST':
@@ -165,7 +165,7 @@ def checkout(request):
                 {
                     'payment_form': payment_form,
                     'price': price,
-                    'discounted_price': discounted_price,
+                    'price_without_discount': price_without_discount,
                 },
             )
 
@@ -174,7 +174,7 @@ def checkout(request):
         payment = Payment.create(
             {
                 'amount': {
-                    'value': discounted_price if discounted_price else price,
+                    'value': price,
                     'currency': 'RUB',
                 },
                 'payment_method_data': {
@@ -206,8 +206,8 @@ def checkout(request):
         return redirect(confirmation_url)
 
     price = subscription.plan.price
-    discounted_price = (
-        price - price * subscription.promocode.discount / 100 if subscription.promocode else None
+    price_without_discount = (
+        float(price) / (1 - subscription.promocode.discount / 100) if subscription.promocode else None
     )
     payment_form = PaymentForm()
 
@@ -217,7 +217,7 @@ def checkout(request):
         {
             'payment_form': payment_form,
             'price': price,
-            'discounted_price': discounted_price,
+            'price_without_discount': price_without_discount,
         },
     )
 
@@ -255,3 +255,5 @@ def payment_confirmation(request):
     plan.delete()
     subscription.delete()
     return redirect('food_app:order')
+
+
