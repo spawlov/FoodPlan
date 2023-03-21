@@ -104,8 +104,11 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(PlanPeriod)
 class PlanPeriodAdmin(admin.ModelAdmin):
-    list_display = ['duration']
+    list_display = ['__str__']
     list_filter = ['duration']
+
+    def get_verbose_name(self, instance, field_name):
+        return instance._meta.get_field(field_name).verbose_name
 
 
 @admin.register(FoodIntake)

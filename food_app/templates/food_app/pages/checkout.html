@@ -19,7 +19,7 @@
                   <ul class="alert alert-danger" role="alert">
                       {% for field in payment_form %}
                           {% for error in field.errors %}
-                              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                              <li style="list-style-type: none;"><strong>{{ field.label }}:</strong> {{ error }}</li>
                           {% endfor %}
                       {% endfor %}
                   </ul>
