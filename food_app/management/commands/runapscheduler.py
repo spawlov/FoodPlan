@@ -1,7 +1,8 @@
-import logging
+# import logging
 from datetime import timedelta
 
 import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django.conf import settings
@@ -12,7 +13,7 @@ from django_apscheduler.models import DjangoJobExecution
 
 from food_app.models import Subscription, Plan
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 def checking_active_subscription():
@@ -21,7 +22,7 @@ def checking_active_subscription():
         if subscription.end <= timezone.now():
             subscription.is_active = False
             subscription.save()
-            print(f'Subscription: {subscription.pk} marked is not active!')
+            logger.info(f'Subscription: {subscription.pk} marked is not active!')
 
 
 def checking_payed_subscription():
@@ -35,12 +36,12 @@ def checking_payed_subscription():
             subscription.delete()
             print(f'Subscription #{subscription_pk} deleted!')
             plan.delete()
-            print(f'Plan #{plan_pk} deleted!')
+            logger.info(f'Plan #{plan_pk} deleted!')
 
 
 def delete_old_job_executions(max_age=604_800):
     DjangoJobExecution.objects.delete_old_job_executions(max_age)
-    print('Old jobs deleted!')
+    logger.info('Old jobs deleted!')
 
 
 class Command(BaseCommand):
@@ -50,7 +51,11 @@ class Command(BaseCommand):
         scheduler = BlockingScheduler(
             timezone=pytz.timezone(settings.TIME_ZONE)
         )
-        scheduler.add_jobstore(DjangoJobStore(), 'default')
+        scheduler.add_jobstore(
+            DjangoJobStore(),
+            'default',
+            replace_existing=True,
+        )
         scheduler.add_job(
             checking_payed_subscription,
             trigger=CronTrigger(second='00'),
@@ -58,7 +63,7 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        print(f'{timezone.now()} -> Added job "checking_payed_description".')
+        logger.info(f'{timezone.now()} -> Added job "checking_payed_description".')
 
         scheduler.add_job(
             checking_active_subscription,
@@ -67,7 +72,7 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        print(f'{timezone.now()} -> Added job "checking_active_description".')
+        logger.info(f'{timezone.now()} -> Added job "checking_active_description".')
 
         scheduler.add_job(
             delete_old_job_executions,
@@ -78,12 +83,12 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        print(f'{timezone.now()} -> Added weekly job: "delete_old_job_executions".')
+        logger.info(f'{timezone.now()} -> Added weekly job: "delete_old_job_executions".')
 
         try:
-            print(f'{timezone.now()} -> Starting scheduler...')
+            logger.info(f'{timezone.now()} -> Starting scheduler...')
             scheduler.start()
         except KeyboardInterrupt:
-            print(f'{timezone.now()} -> Stopping scheduler...')
+            logger.info(f'{timezone.now()} -> Stopping scheduler...')
             scheduler.shutdown()
-            print(f'{timezone.now()} -> Scheduler shut down successfully!')
+            logger.info(f'{timezone.now()} -> Scheduler shut down successfully!')
