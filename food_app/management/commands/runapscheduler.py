@@ -2,7 +2,6 @@
 from datetime import timedelta
 
 import pytz
-from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django.conf import settings
@@ -10,10 +9,9 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
+from loguru import logger
 
 from food_app.models import Subscription, Plan
-
-from loguru import logger
 
 
 def checking_active_subscription():
@@ -63,7 +61,7 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        logger.info(f'{timezone.now()} -> Added job "checking_payed_description".')
+        logger.info('Added job "checking_payed_description".')
 
         scheduler.add_job(
             checking_active_subscription,
@@ -72,7 +70,7 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        logger.info(f'{timezone.now()} -> Added job "checking_active_description".')
+        logger.info('Added job "checking_active_description".')
 
         scheduler.add_job(
             delete_old_job_executions,
@@ -83,12 +81,12 @@ class Command(BaseCommand):
             max_instances=1,
             replace_existing=True,
         )
-        logger.info(f'{timezone.now()} -> Added weekly job: "delete_old_job_executions".')
+        logger.info('Added weekly job: "delete_old_job_executions".')
 
         try:
-            logger.info(f'{timezone.now()} -> Starting scheduler...')
+            logger.info('Starting scheduler...')
             scheduler.start()
         except KeyboardInterrupt:
-            logger.info(f'{timezone.now()} -> Stopping scheduler...')
+            logger.info('Stopping scheduler...')
             scheduler.shutdown()
-            logger.info(f'{timezone.now()} -> Scheduler shut down successfully!')
+            logger.info('Scheduler shut down successfully!')
