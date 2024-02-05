@@ -159,11 +159,11 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-EMAIL = env('EMAIL_MAIL')
+EMAIL = env('EMAIL_MAIL', default="")
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 2525
-EMAIL_HOST_USER = env('EMAIL_LOGIN_MAIL')
-EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD_MAIL')
+EMAIL_HOST_USER = env('EMAIL_LOGIN_MAIL', default="")
+EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD_MAIL', default="")
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_TIMEOUT = 60
