@@ -35,9 +35,11 @@ SECRET_KEY = env.str('SECRET_KEY', default="Fake-Key")
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list(
-    'ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '[::1]']
+    'ALLOWED_HOSTS',
+    default=['localhost', '127.0.0.1', '[::1]'],
 )
 
+CSRF_TRUSTED_ORIGINS=env.list('CSRF_ORIGINS', default=[])
 
 # Application definition
 
