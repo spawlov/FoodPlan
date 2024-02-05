@@ -289,5 +289,5 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 
 # Yookassa
-Configuration.account_id = env('YOOKASSA_SHOP_ID')
-Configuration.secret_key = env('YOOKASSA_CLIENT_SECRET')
+Configuration.account_id = env('YOOKASSA_SHOP_ID', default="")
+Configuration.secret_key = env('YOOKASSA_CLIENT_SECRET', default="")
