@@ -119,7 +119,7 @@ def order(request):
         plan.food_intakes.add(*order_form.cleaned_data['food_intakes'])
         plan.save()
 
-        today = datetime.now()
+        today = timezone.now()
         subscription_end = today + timedelta(mdays[today.month])
 
         subscription = Subscription(
