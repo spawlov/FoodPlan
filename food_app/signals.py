@@ -16,14 +16,9 @@ def create_new_customer(sender, instance, created, *args, **kwargs):
 
 @receiver(post_save, sender=Subscription)
 def create_menu_items(sender, instance, created, update_fields, **kwargs):
+    print(instance, created, update_fields, **kwargs)
     if (created or (update_fields and 'is_active' in update_fields)) and instance.is_active:
         plan = instance.plan
-
-        recipes = Recipe.objects.filter(
-            category=plan.recipe_category,
-            food_intake__in=plan.food_intakes.all(),
-        ).exclude(allergic_categories__in=plan.allergies.all())
-
         food_intakes = plan.food_intakes.all()
         recipes = Recipe.objects.filter(
             category=plan.recipe_category,
