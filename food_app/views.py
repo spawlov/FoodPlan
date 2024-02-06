@@ -120,7 +120,9 @@ def order(request):
         plan.save()
 
         today = timezone.now()
+        print(today)
         subscription_end = today + timedelta(mdays[today.month])
+        print(subscription_end)
 
         subscription = Subscription(
             end=subscription_end,
