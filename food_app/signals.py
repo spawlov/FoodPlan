@@ -25,26 +25,26 @@ def create_menu_items(sender, instance, created, update_fields, **kwargs):
             food_intake__in=food_intakes,
         ).exclude(allergic_categories__in=plan.allergies.all())
 
-        menu_items = []
-        for food_intake in food_intakes:
-
-            current_date = instance.start
-            food_intake_recipes = recipes.filter(food_intake=food_intake).all()
-
-            # TODO: remove it
-            if not food_intake_recipes:
-                continue
-
-            while current_date <= instance.end:
-                menu_items.append(
-                    Menu(
-                        date=current_date,
-                        recipe=random.choice(food_intake_recipes),
-                        subscription=instance
-                    )
-                )
-                current_date += timedelta(days=1)
+        # menu_items = []
+        # for food_intake in food_intakes:
+        #
+        #     current_date = instance.start
+        #     food_intake_recipes = recipes.filter(food_intake=food_intake).all()
+        #
+        #     # TODO: remove it
+        #     if not food_intake_recipes:
+        #         continue
+        #
+        #     while current_date <= instance.end:
+        #         menu_items.append(
+        #             Menu(
+        #                 date=current_date,
+        #                 recipe=random.choice(food_intake_recipes),
+        #                 subscription=instance
+        #             )
+        #         )
+        #         current_date += timedelta(days=1)
 
         # TODO: remove it
-        if menu_items:
-            Menu.objects.bulk_create(menu_items)
+        # if menu_items:
+        #     Menu.objects.bulk_create(menu_items)
