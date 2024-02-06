@@ -223,8 +223,8 @@ def checkout(request):
     )
 
 
-# @login_required
 @csrf_exempt
+@login_required
 def payment_confirmation(request):
     payment_id = request.session.get('payment_id')
     subscription_id = request.session.get('subscription_id')
