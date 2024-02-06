@@ -264,10 +264,6 @@ def payment_confirmation(request):
             current_date = subscription.start
             food_intake_recipes = recipes.filter(food_intake=food_intake).all()
 
-            # TODO: remove it
-            if not food_intake_recipes:
-                continue
-
             while current_date <= subscription.end:
                 menu_items.append(
                     Menu(
