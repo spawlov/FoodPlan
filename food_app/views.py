@@ -231,8 +231,8 @@ def payment_confirmation(request):
     payment_id = request.session.get('payment_id')
     subscription_id = request.session.get('subscription_id')
 
-    request.session.pop('payment_id', None)
-    request.session.pop('subscription_id', None)
+    # request.session.pop('payment_id', None)
+    # request.session.pop('subscription_id', None)
 
     if not payment_id or not subscription_id:
         messages.error(request, 'Ошибка оплаты. Попробуйте, пожалуйста, снова.')
