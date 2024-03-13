@@ -249,7 +249,8 @@ def payment_confirmation(request):
     if payment.status == 'succeeded':
         subscription.is_active = True
         subscription.paid = True
-        subscription.save(update_fields=['is_active', 'paid'])
+        subscription.save()
+        # subscription.save(update_fields=['is_active', 'paid'])
 
         # food_intakes = plan.food_intakes.all()
 
