@@ -251,30 +251,30 @@ def payment_confirmation(request):
         subscription.paid = True
         subscription.save(update_fields=['is_active', 'paid'])
 
-        food_intakes = plan.food_intakes.all()
+        # food_intakes = plan.food_intakes.all()
 
-        recipes = Recipe.objects.filter(
-            category=plan.recipe_category,
-            food_intake__in=food_intakes,
-        ).exclude(allergic_categories__in=plan.allergies.all())
+        # recipes = Recipe.objects.filter(
+        #     category=plan.recipe_category,
+        #     food_intake__in=food_intakes,
+        # ).exclude(allergic_categories__in=plan.allergies.all())
 
-        menu_items = []
-        for food_intake in food_intakes:
-
-            current_date = subscription.start
-            food_intake_recipes = recipes.filter(food_intake=food_intake).all()
-
-            while current_date <= subscription.end:
-                menu_items.append(
-                    Menu(
-                        date=current_date,
-                        recipe=random.choice(food_intake_recipes),
-                        subscription=subscription
-                    )
-                )
-
-        if menu_items:
-            Menu.objects.bulk_create(menu_items)
+        # menu_items = []
+        # for food_intake in food_intakes:
+        #
+        #     current_date = subscription.start
+        #     food_intake_recipes = recipes.filter(food_intake=food_intake).all()
+        #
+        #     while current_date <= subscription.end:
+        #         menu_items.append(
+        #             Menu(
+        #                 date=current_date,
+        #                 recipe=random.choice(food_intake_recipes),
+        #                 subscription=subscription
+        #             )
+        #         )
+        #
+        # if menu_items:
+        #     Menu.objects.bulk_create(menu_items)
 
         messages.success(request, 'Подписка успешно оформлена!')
         return redirect('food_app:account')
