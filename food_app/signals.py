@@ -17,7 +17,9 @@ def create_new_customer(sender, instance, created, *args, **kwargs):
 @receiver(post_save, sender=Subscription)
 def create_menu_items(sender, instance, created, update_fields, **kwargs):
     print(f'I`m from signal: {instance}, {created}, {update_fields}, {kwargs}')
-    if (created or (update_fields and 'is_active' in update_fields)) and instance.is_active:
+    print(f'Update fields: {update_fields.get("is_active"), update_fields.get("paid")}')
+    # if (created or (update_fields and 'is_active' in update_fields)) and instance.is_active:
+    if instance.is_active and instance.paid:
         plan = instance.plan
         food_intakes = plan.food_intakes.all()
         recipes = Recipe.objects.filter(
