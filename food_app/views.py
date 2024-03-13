@@ -250,8 +250,8 @@ def payment_confirmation(request):
         print(f'From views: {subscription}')
         subscription.is_active = True
         subscription.paid = True
-        subscription.save()
-        # subscription.save(update_fields=['is_active', 'paid'])
+        # subscription.save()
+        subscription.save(update_fields=['is_active', 'paid'])
 
         # food_intakes = plan.food_intakes.all()
 
