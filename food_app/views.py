@@ -247,6 +247,7 @@ def payment_confirmation(request):
         return redirect('food_app:order')
 
     if payment.status == 'succeeded':
+        print(subscription)
         subscription.is_active = True
         subscription.paid = True
         subscription.save()
